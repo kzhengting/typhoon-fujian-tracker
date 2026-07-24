@@ -1,0 +1,13 @@
+{
+  "name": "typhoon-index-builder",
+  "version": "1.0.0",
+  "private": true,
+  "description": "One-off crawler that builds typhoon-index.json (1949-present) for the Fujian typhoon tracker.",
+  "type": "commonjs",
+  "scripts": {
+    "build": "node build-typhoon-index.js"
+  },
+  "dependencies": {
+    "pinyin-pro": "^3.26.0"
+  }
+}
