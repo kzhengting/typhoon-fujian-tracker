@@ -1,4 +1,5 @@
 node_modules/
 .cache-fjmin.json
 .cache-landfj.json
+.cache-details.json
 package-lock.json
