@@ -180,6 +180,73 @@ function parseNo(code) {
   return null;
 }
 
+// 判定 nameless/no=0 台风的路径详情是否为 NMC 对无效 ID 返回的"假数据"。
+// NMC 的 view_<id> 接口对无效/陈旧 ID 会返回别的台风（往往是 1950 年代或当年最新）
+// 的聚合数据，污染索引。这里用三条规则识别并剔除：
+//   1. 路径为空（无法判定，nameless 条目无价值）→ 无效
+//   2. 首点年份 ≠ 台风自身年份 → 数据属于别的年份的台风 → 无效
+//   3. 路径覆盖年份跨度 > 1（如 1950→1998 的聚合假数据）→ 无效
+// 具名/有编号台风始终保留（即便详情缺失也是真实台风）。
+function isValidNamelessPath(item, rawPts) {
+  if (!rawPts || rawPts.length === 0) return false;
+  const years = new Set();
+  for (const p of rawPts) {
+    const t = String((p && p[1]) || "");
+    if (/^\d{4}/.test(t)) years.add(Number(t.slice(0, 4)));
+  }
+  if (years.size === 0) return false;
+  const firstY = Number(String((rawPts[0] && rawPts[0][1]) || "").slice(0, 4));
+  if (!Number.isFinite(firstY) || firstY !== item.year) return false;
+  const yMin = Math.min(...years), yMax = Math.max(...years);
+  if (yMax - yMin > 1) return false; // 跨年聚合假数据
+  return true;
+}
+
+// 无名台风去重：NMC 对早期某些无名台风（!name && !enName）会发放多个 ID，
+// 它们的路径详情完全一致（同年同号同路径），仅 id 不同，造成索引重复。
+// 典型案例：1975#6、1970#4、1961#16、1986#13 各出现两条（共 8 条冗余）。
+// 这里按路径指纹（首点坐标 + 末点坐标 + 路径点数）分组，每组仅保留首条，
+// 其余标记为 duplicate 并置 valid=false，让下游 filter 一并剔除。
+// 具名/有英文名的台风一律不参与去重（即便同年同号也可能是不同台风）。
+function dedupNamelessTyphoons(items, detailsMap) {
+  const groups = new Map();
+  for (const it of items) {
+    // 仅对无名台风（无中文名 AND 无英文名）去重
+    if (it.name || it.enName) continue;
+    // 仅对路径已校验为有效的无名台风去重（无效的会被 isValidNamelessPath 剔除）
+    if (it.valid === false) continue;
+    const pts = detailsMap[it.id];
+    if (!pts || pts.length === 0) continue;
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+    const firstLat = Number(first[5]);
+    const firstLng = Number(first[4]);
+    const lastLat = Number(last[5]);
+    const lastLng = Number(last[4]);
+    if (![firstLat, firstLng, lastLat, lastLng].every(Number.isFinite)) continue;
+    const fp = [
+      firstLat.toFixed(2),
+      firstLng.toFixed(2),
+      lastLat.toFixed(2),
+      lastLng.toFixed(2),
+      pts.length,
+    ].join(",");
+    if (!groups.has(fp)) groups.set(fp, []);
+    groups.get(fp).push(it);
+  }
+  let dropped = 0;
+  for (const group of groups.values()) {
+    if (group.length <= 1) continue;
+    // 保留首条，其余标记为重复（置 valid=false 让下游 filter 剔除）
+    for (let i = 1; i < group.length; i++) {
+      group[i].valid = false;
+      group[i].duplicate = true;
+      dropped++;
+    }
+  }
+  return dropped;
+}
+
 // 内存级路径详情缓存（仅本次运行有效，避免 fjMin/landFujian 重复抓取同一台风详情）
 const detailsCache = {};
 async function fetchDetails(id) {
@@ -294,6 +361,19 @@ async function main() {
     async (item) => {
       item.fjMin = await fjMinFor(item.id, cache);
       item.landFujian = await landFujianFor(item.id, landCache);
+      // nameless 台风（!name && !enName，含 no=0 与早期无名有编号台风）：
+      // fjMin/landFujian 命中缓存时 detailsCache 可能为空，故显式补抓详情，用于
+      // (1) no=0 的 isValidNamelessPath 假数据甄别；(2) dedupNamelessTyphoons 路径指纹去重。
+      if (!item.name && !item.enName) {
+        if (!detailsCache[item.id]) {
+          try { await fetchDetails(item.id); } catch (e) { /* 留空，校验时判为无效 */ }
+        }
+        item.valid = item.no === 0
+          ? isValidNamelessPath(item, detailsCache[item.id])
+          : true;
+      } else {
+        item.valid = true;
+      }
       if (++sinceSave >= 100) {
         sinceSave = 0;
         fs.writeFileSync(CACHE, JSON.stringify(cache));
@@ -306,22 +386,54 @@ async function main() {
   fs.writeFileSync(CACHE, JSON.stringify(cache));
   fs.writeFileSync(LAND_CACHE, JSON.stringify(landCache));
 
-  // 3) 生成索引条目
-  const index = raw.map((it) => {
-    const fjMin = it.fjMin;
-    return {
-      id: it.id,
-      year: it.year,
-      no: it.no,
-      name: it.name,
-      enName: it.enName,
-      pinyin: pinyinInitials(it.name),
-      fjMin: fjMin,
-      fujianHit: fjMin != null && fjMin < HIT_KM,
-      // 登陆福建：海岸线穿越检测（海→陆且登陆点落在福建海岸段），非距离阈值
-      landFujian: !!it.landFujian,
-    };
-  });
+  // 无名台风去重：同年同号同路径指纹的仅保留一条（NMC 多 ID 重复）
+  const droppedDup = dedupNamelessTyphoons(raw, detailsCache);
+  if (droppedDup > 0) {
+    console.log(`  标记 ${droppedDup} 个无名台风重复条目（同年同号同路径指纹，NMC 多 ID）`);
+  }
+
+  // 3) 生成索引条目（剔除 nameless/no=0 的 NMC 假数据 + 无名台风重复条目）
+  let droppedPhantom = 0;
+  let droppedDuplicate = 0;
+  let index = raw
+    .filter((it) => {
+      if (it.valid === false) {
+        if (it.duplicate) droppedDuplicate++; else droppedPhantom++;
+        return false;
+      }
+      return true;
+    })
+    .map((it) => {
+      const fjMin = it.fjMin;
+      return {
+        id: it.id,
+        year: it.year,
+        no: it.no,
+        name: it.name,
+        enName: it.enName,
+        pinyin: pinyinInitials(it.name),
+        fjMin: fjMin,
+        fujianHit: fjMin != null && fjMin < HIT_KM,
+        // 登陆福建：海岸线穿越检测（海→陆且登陆点落在福建海岸段），非距离阈值
+        landFujian: !!it.landFujian,
+      };
+    });
+  if (droppedPhantom > 0) {
+    console.log(`  剔除 ${droppedPhantom} 个 nameless/no=0 假数据条目（NMC 对无效 ID 返回的聚合/错年数据）`);
+  }
+  if (droppedDuplicate > 0) {
+    console.log(`  剔除 ${droppedDuplicate} 个无名台风重复条目（同年同号同路径指纹，NMC 多 ID）`);
+  }
+
+  // 4) 剔除无路径台风（fjMin=null：NMC 对该 ID 无路径数据，无法在地图上展示）
+  //    典型案例：2020 年黄蜂/森拉克/海高斯/鲸鱼/灿鸿/莲花/沙德尔/天鹅/艾莎尼/艾涛 等 10 个
+  //    具名台风，NMC 详情接口返回空路径。注意保留 fjMin===0（直接命中，有效）。
+  const beforeNoPath = index.length;
+  index = index.filter((t) => t.fjMin != null);
+  const droppedNoPath = beforeNoPath - index.length;
+  if (droppedNoPath > 0) {
+    console.log(`  剔除 ${droppedNoPath} 个无路径台风（fjMin=null，NMC 无路径数据）`);
+  }
 
   // 按年份倒序、同年按编号倒序
   index.sort((a, b) => (b.year - a.year) || ((b.no || 0) - (a.no || 0)));

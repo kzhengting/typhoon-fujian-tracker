@@ -2,3 +2,10 @@ node_modules/
 .playwright-cli/
 *.png
 *.txt
+
+# 一次性诊断/修复脚本（下划线前缀，已沉淀为 project_memory 经验）
+scripts/_*.js
+scripts/_*.json
+
+# 备份文件
+*.bak

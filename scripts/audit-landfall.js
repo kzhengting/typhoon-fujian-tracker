@@ -28,11 +28,20 @@ const VIEW_URL = (id) => "https://typhoon.nmc.cn/weatherservice/typhoon/jsons/vi
 
 // NMC p[1] 为 UTC，转北京时(UTC+8)
 function nmcTime(str) {
-    const m = String(str || "").match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/);
-    if (!m) return String(str || "");
-    const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) + 8 * 3600 * 1000);
-    const p = (n) => String(n).padStart(2, "0");
-    return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:00`;
+    let m = String(str || "").match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/); // 12位 YYYYMMDDHHMM
+    if (m) {
+        const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) + 8 * 3600 * 1000);
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:00`;
+    }
+    // 老数据 10 位格式 YYYYMMDDHH（2010-2014 年部分台风，无分钟），同样为 UTC，转北京时
+    m = String(str || "").match(/^(\d{4})(\d{2})(\d{2})(\d{2})$/);
+    if (m) {
+        const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], 0) + 8 * 3600 * 1000);
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:00:00`;
+    }
+    return String(str || "");
 }
 
 function haversineKm(a, b) {

@@ -921,66 +921,11 @@
       align-items: center;
     }
 
-    #panelToggle {
-      position: absolute;
-      top: max(14px, env(safe-area-inset-top));
-      left: max(14px, env(safe-area-inset-left));
-      z-index: 1200;
-      pointer-events: auto;
-      min-width: 48px;
-      height: 48px;
-      padding: 0 12px;
-      border-radius: 12px;
-      font: 600 13px/1 "PingFang SC", system-ui, sans-serif;
-      color: var(--ink-dim);
-      background: rgba(13, 20, 28, 0.66);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      border: 1px solid rgba(127, 212, 200, 0.22);
-      cursor: pointer;
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      user-select: none;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    #panelToggle::before {
-      content: "";
-      display: inline-block;
-      width: 0;
-      height: 0;
-      border-left: 5px solid transparent;
-      border-right: 5px solid transparent;
-      border-top: 7px solid currentColor;
-      flex-shrink: 0;
-      transition: transform 0.25s ease;
-    }
-
-    #panelToggle:hover {
-      color: var(--foam);
-      border-color: rgba(127, 212, 200, 0.5);
-    }
-
-    #panelToggle.active {
-      color: #06121a;
-      background: linear-gradient(135deg, #7fd4c8, #5fb8d8);
-    }
-
-    /* 展开态箭头旋转朝上 */
-    #panelToggle.active::before {
-      transform: rotate(180deg);
-    }
-
-    /* 收起/展开按钮仅移动端显示，避免与桌面端标题重叠 */
+    /* 浮动数据条 + 底部抽屉仅手机端显示，PC 端完全不渲染（Task 2/3 零回归） */
     @media (min-width: 769px) {
-      #panelToggle {
-        display: none;
-      }
 
-      /* 浮动数据条仅手机端全屏地图模式可见，PC 端完全不渲染（Task 2 零回归） */
-      #mobileChip {
+      #mobileChip,
+      #mobileSheet {
         display: none !important;
       }
     }
@@ -1831,11 +1776,10 @@
         min-height: 100dvh;
       }
 
-      /* 手机端：地图容器/瓦片不捕获触摸以允许页面纵向滚动；仅交互图层
-         （marker 图标 leaflet-marker-pane、leaflet-interactive 矢量）可点击。
-         Task 3：修复展开态点位点击（鸡生蛋问题），背景瓦片/风圈仍不拦截滚动 */
+      /* 手机端：地图容器始终可交互（Task 3：抽屉覆盖在地图之上，地图拖拽常驻启用）。
+         仅交互图层（marker 图标 leaflet-marker-pane、leaflet-interactive 矢量）原本就可点击。 */
       #map {
-        pointer-events: none;
+        pointer-events: auto;
       }
 
       #map .leaflet-marker-pane,
@@ -1843,7 +1787,7 @@
         pointer-events: auto;
       }
 
-      /* 收起态（全屏地图模式）：整体恢复交互 */
+      /* 收起态（全屏地图模式）：旧规则，ui-collapsed 不再被切换，留作无害死代码 */
       body.ui-collapsed #map {
         pointer-events: auto;
       }
@@ -2061,10 +2005,9 @@
         padding: 0.2rem 0.4rem;
       }
 
-      /* 手机端全屏地图模式常驻数据条（Task 2）：城市·距离·态势 + 风圈开关 + 展开按钮 */
+      /* 手机端常驻数据条：城市·距离·态势 + 风圈开关（Task 3：始终可见，点击数据区展开抽屉） */
       #mobileChip {
-        display: none;
-        /* 展开态隐藏；收起态由 body.ui-collapsed 显示 */
+        display: flex;
         position: fixed;
         left: max(8px, env(safe-area-inset-left));
         right: max(8px, env(safe-area-inset-right));
@@ -2085,8 +2028,9 @@
         pointer-events: auto;
       }
 
-      body.ui-collapsed #mobileChip {
-        display: flex;
+      /* 抽屉展开时隐藏底部数据条，避免重叠 */
+      body.sheet-open #mobileChip {
+        display: none;
       }
 
       #mobileChip .mc-data {
@@ -2096,6 +2040,7 @@
         flex: 1 1 auto;
         min-width: 0;
         flex-wrap: wrap;
+        cursor: pointer;
       }
 
       #mobileChip .mc-city {
@@ -2147,7 +2092,7 @@
         cursor: not-allowed;
       }
 
-      /* 收起态：上移地图侧栏与缩放控件，避开底部数据条（Task 5 防重叠） */
+      /* 旧 ui-collapsed 规则：不再被切换，留作无害死代码 */
       body.ui-collapsed .map-side {
         bottom: calc(env(safe-area-inset-bottom) + 80px);
       }
@@ -2161,6 +2106,109 @@
       .toolbar-actions .link-btn {
         min-height: 44px;
         min-width: 44px;
+      }
+
+      /* Task 3：可拖拽底部抽屉（3-snap：hidden/half/full） */
+      #mobileSheet {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1300;
+        height: 92vh;
+        background: rgba(13, 26, 36, 0.98);
+        border-top: 1px solid rgba(127, 212, 200, 0.25);
+        border-radius: 16px 16px 0 0;
+        display: flex;
+        flex-direction: column;
+        transform: translateY(100%);
+        transition: transform 0.28s ease;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+
+      #mobileSheet[hidden] {
+        display: none;
+      }
+
+      #mobileSheet.dragging {
+        transition: none;
+      }
+
+      #mobileSheet.snap-hidden {
+        transform: translateY(100%);
+      }
+
+      #mobileSheet.snap-half {
+        transform: translateY(50%);
+      }
+
+      #mobileSheet.snap-full {
+        transform: translateY(8%);
+      }
+
+      #mobileSheet .ms-handle {
+        width: 36px;
+        height: 4px;
+        background: rgba(127, 212, 200, 0.4);
+        border-radius: 2px;
+        margin: 8px auto 4px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+
+      #mobileSheet .ms-head {
+        padding: 4px 14px 8px;
+        flex-shrink: 0;
+      }
+
+      #mobileSheet .ms-summary {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: #cfe8e2;
+        margin-bottom: 8px;
+      }
+
+      #mobileSheet .ms-sep {
+        opacity: 0.4;
+      }
+
+      #mobileSheet .ms-tools {
+        display: flex;
+        gap: 6px;
+      }
+
+      #mobileSheet .ms-btn {
+        flex: 1;
+        min-height: 36px;
+        padding: 6px 4px;
+        background: rgba(127, 212, 200, 0.1);
+        border: 1px solid rgba(127, 212, 200, 0.2);
+        border-radius: 8px;
+        color: #cfe8e2;
+        font-size: 12px;
+        cursor: pointer;
+      }
+
+      #mobileSheet .ms-btn.on {
+        background: rgba(127, 212, 200, 0.3);
+        border-color: rgba(127, 212, 200, 0.5);
+      }
+
+      #mobileSheet .ms-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 0 14px 14px;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* 半屏时 body 不可滚动（仅 header 可见） */
+      #mobileSheet.snap-half .ms-body {
+        overflow: hidden;
+        max-height: 0;
       }
     }
 
@@ -2293,11 +2341,9 @@
         <div class="error-banner" id="errorBanner"></div>
       </section>
 
-      <button type="button" id="panelToggle" aria-label="收起/展开台风信息层">收起</button>
-
-      <!-- 手机端全屏地图模式常驻数据条：城市·距离·态势 + 风圈开关 + 展开按钮（Task 2） -->
+      <!-- 手机端常驻数据条：城市·距离·态势 + 风圈开关（点击数据区展开底部抽屉） -->
       <div id="mobileChip" class="mobile-chip" hidden>
-        <div class="mc-data">
+        <div class="mc-data" id="mcData">
           <span class="mc-city" id="mcCity">—</span>
           <span class="mc-sep">·</span>
           <span class="mc-dist" id="mcDist">—</span>
@@ -2306,8 +2352,29 @@
         </div>
         <div class="mc-actions">
           <button type="button" id="mcWind" class="mc-btn on" title="显示 / 隐藏 7/10/12 级风圈">风圈</button>
-          <button type="button" id="mcExpand" class="mc-btn" title="展开台风信息层">展开</button>
         </div>
+      </div>
+
+      <!-- 手机端可拖拽底部抽屉（3-snap：hidden/half/full）：信息层只读视图 + 工具栏 -->
+      <div id="mobileSheet" class="mobile-sheet" hidden>
+        <div class="ms-handle" id="msHandle"></div>
+        <div class="ms-head">
+          <div class="ms-summary">
+            <span class="ms-city" id="msCity">—</span>
+            <span class="ms-sep">·</span>
+            <span class="ms-dist" id="msDist">—</span>
+            <span class="ms-sep">·</span>
+            <span class="ms-phase" id="msPhase">—</span>
+          </div>
+          <div class="ms-tools">
+            <button type="button" class="ms-btn" id="msWind" title="风圈开关">风圈</button>
+            <button type="button" class="ms-btn" id="msObs" title="点位开关">点位</button>
+            <button type="button" class="ms-btn" id="msFit" title="框选路径">框选</button>
+            <button type="button" class="ms-btn" id="msRefresh" title="立即刷新">刷新</button>
+            <button type="button" class="ms-btn" id="msFs" title="全屏">全屏</button>
+          </div>
+        </div>
+        <div class="ms-body" id="msBody"></div>
       </div>
 
       <div class="map-zoom" aria-label="地图缩放">
@@ -2547,11 +2614,9 @@
       windyLink: document.getElementById("windyLink"),
       measureBtn: document.getElementById("measureBtn"),
       fsBtn: document.getElementById("fsBtn"),
-      panelToggle: document.getElementById("panelToggle"),
       lifeTimeline: document.getElementById("lifeTimeline"),
       lifeStats: document.getElementById("lifeStats"),
       mcWind: document.getElementById("mcWind"),
-      mcExpand: document.getElementById("mcExpand"),
       mcCity: document.getElementById("mcCity"),
       mcDist: document.getElementById("mcDist"),
       mcPhase: document.getElementById("mcPhase"),
@@ -2751,13 +2816,22 @@
     }
 
     function nmcTime(str) {
-      const m = String(str || "").match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/);
-      if (!m) return String(str || "");
-      // NMC p[1] 为 UTC 时刻（经 p[2] 时间戳与 p[12] 显示字段核实），转北京时(UTC+8)后按分量格式化；
-      // Date 算术自动处理跨日/跨月/跨年（如 UTC 18:00 +8h → 次日 02:00）。
-      const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) + 8 * 3600 * 1000);
-      const p = (n) => String(n).padStart(2, "0");
-      return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:00`;
+      let m = String(str || "").match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/); // 12位 YYYYMMDDHHMM
+      if (m) {
+        // NMC p[1] 为 UTC 时刻（经 p[2] 时间戳与 p[12] 显示字段核实），转北京时(UTC+8)后按分量格式化；
+        // Date 算术自动处理跨日/跨月/跨年（如 UTC 18:00 +8h → 次日 02:00）。
+        const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]) + 8 * 3600 * 1000);
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:${p(d.getUTCMinutes())}:00`;
+      }
+      // 老数据 10 位格式 YYYYMMDDHH（2010-2014 年部分台风，无分钟），同样为 UTC，转北京时
+      m = String(str || "").match(/^(\d{4})(\d{2})(\d{2})(\d{2})$/);
+      if (m) {
+        const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], 0) + 8 * 3600 * 1000);
+        const p = (n) => String(n).padStart(2, "0");
+        return `${d.getUTCFullYear()}-${p(d.getUTCMonth() + 1)}-${p(d.getUTCDate())} ${p(d.getUTCHours())}:00:00`;
+      }
+      return String(str || "");
     }
 
     function parseForecastPoint(f) {
@@ -2796,6 +2870,23 @@
       return Object.keys(out).length ? out : null;
     }
 
+    // 历史台风风圈估算（参数化模型）
+    // NMC 仅对当年台风返回 p[10] 风圈观测；历史档案 p[10] 为空，需用经验公式估算，
+    // 供 drawWindCircles 以虚线 + 「（估算）」标注呈现，与观测实线明确区分。
+    // 输入：parsePoint 产出的 point 对象（含 .speed = Vmax m/s，可能为 null）
+    // 输出：{ r7:[NE,SE,SW,NW], r10:[...], r12:null, isEstimated:true } 或 null
+    // 四象限顺序 [NE, SE, SW, NW] 与 parseWindCircles / windPolygon / maxRadius 一致
+    function estimateWindCircles(point) {
+      if (!point || point.speed == null || point.speed < 18) return null; // TD/弱 TS 误差过大，不估
+      const v = point.speed;
+      const r7Max = 8 * v + 70;  // 7级风圈最大半径（km）
+      const r10Max = 4 * v + 10; // 10级风圈最大半径（km）
+      // 典型非对称：NE/SW 偏大，SE/NW 偏小（约 0.65 倍）
+      const quad7 = [r7Max, 0.65 * r7Max, r7Max, 0.65 * r7Max].map((n) => Math.round(n));
+      const quad10 = [r10Max, 0.65 * r10Max, r10Max, 0.65 * r10Max].map((n) => Math.round(n));
+      return { r7: quad7, r10: quad10, r12: null, isEstimated: true };
+    }
+
     // 风圈最大半径（用于文本展示）
     function maxRadius(quad) {
       return quad && quad.length ? Math.max(...quad) : 0;
@@ -2808,7 +2899,7 @@
       const level = p[3];
       const fcRaw = p[11] && p[11].BABJ ? p[11].BABJ : [];
       const forecast = (Array.isArray(fcRaw) ? fcRaw : []).map(parseForecastPoint).filter(Boolean);
-      return {
+      const point = {
         id: p[0],
         time: nmcTime(p[1]),
         levelCode: level,
@@ -2823,6 +2914,9 @@
         windCircles: parseWindCircles(p[10]),
         forecast,
       };
+      // 历史台风 p[10] 为空时用参数化模型估算风圈（isEstimated=true），与观测区分呈现
+      point.estimatedWindCircles = estimateWindCircles(point);
+      return point;
     }
 
     async function fetchTyphoonList(year) {
@@ -3037,8 +3131,10 @@
 
     // 绘制 7/10/12 级风圈（由外到内叠放）
     function drawWindCircles(center, point) {
-      const wc = point.windCircles;
+      const wc = point.windCircles || point.estimatedWindCircles;
       if (!wc) return;
+      // 仅估算（无观测）时用虚线 + 降低填充透明度，与观测实线明确区分
+      const isEstimated = !point.windCircles;
       const specs = [
         { quad: wc.r7, color: "rgba(127,212,200,0.95)", fill: "rgba(127,212,200,0.18)" },
         { quad: wc.r10, color: "rgba(240,180,90,1)", fill: "rgba(240,180,90,0.2)" },
@@ -3051,11 +3147,12 @@
         L.polygon(ring, {
           color,
           weight: 1.8,
+          dashArray: isEstimated ? "6 4" : null,
           smoothFactor: 1.2,
           fillColor: fill,
-          fillOpacity: 1,
+          fillOpacity: isEstimated ? 0.10 : 1,
           interactive: false,
-          className: "wind-ring",
+          className: "wind-ring" + (isEstimated ? " wind-ring-est" : ""),
         })
           .addTo(layers.wind);
       });
@@ -3064,13 +3161,10 @@
     // 点击某点才显示其风圈：清空其它已显示风圈后，仅绘制该点风圈（center 缺省取该点自身坐标）
     function showWindCircle(point, center) {
       layers.wind.clearLayers();
-      if (!point || !point.windCircles) return;
-      // 手机端点击路径点看风圈时自动收起信息浮层，露出全图（风圈被 .impact/.ui 遮挡）
-      // Task 3：现在展开态点位已可点击，此分支不再是死代码；
-      // 调用 syncMobilePanel 恢复地图拖拽/缩放 + invalidateSize + 同步数据条
-      if (window.matchMedia("(max-width: 768px)").matches && !document.body.classList.contains("ui-collapsed")) {
-        document.body.classList.add("ui-collapsed");
-        syncMobilePanel();
+      if (!point || (!point.windCircles && !point.estimatedWindCircles)) return;
+      // 手机端：点击路径点看风圈时收起底部抽屉，露出全图查看风圈
+      if (window.matchMedia("(max-width: 768px)").matches && typeof currentSnap !== "undefined" && currentSnap !== "hidden") {
+        setSnap("hidden");
       }
       const c = center && Number.isFinite(center[0]) && Number.isFinite(center[1])
         ? center
@@ -3094,7 +3188,9 @@
     }
 
     function pointPopup(p) {
-      const wc = p.windCircles;
+      const wc = p.windCircles || p.estimatedWindCircles;
+      // 估算风圈（无观测）在标签后追加「（估算）」
+      const isEstimated = !p.windCircles;
       let wcTxt = "";
       if (wc) {
         const rows = [];
@@ -3102,10 +3198,11 @@
           if (!wc[k]) return;
           const q = wc[k];
           const quad = `${q[0]}/${q[1]}/${q[2]}/${q[3]}`;
+          const lbl = isEstimated ? `${label}（估算）` : label;
           rows.push(
             `<div class="pt-pop-row wc-row">` +
             `<span class="wc-dot" style="background:${col}"></span>` +
-            `<span class="wc-label">${label}</span>` +
+            `<span class="wc-label">${lbl}</span>` +
             `<span class="wc-val">${quad} km</span>` +
             `<span class="wc-hint">（NE/SE/SW/NW·最大${maxRadius(q)}km）</span>` +
             `</div>`
@@ -3265,7 +3362,7 @@
         }).bindPopup(pointPopup(latest), { className: "pt-popup", maxWidth: 280 }).addTo(layers.markers);
         // 当前定位点常无风圈半径字段，退而取最近一个有风圈数据的路径点，并以当前台风位置为圆心展示
         tyMarker.on("click", () => {
-          const target = [...points].reverse().find((p) => p.windCircles) || latest;
+          const target = [...points].reverse().find((p) => p.windCircles || p.estimatedWindCircles) || latest;
           showWindCircle(target, latestLL);
         });
 
@@ -3291,13 +3388,9 @@
       if (all.length >= 2) {
         lastBounds = L.latLngBounds(all).pad(0.16);
         if (state.fitMap) {
-          // Task 1：手机端首次加载台风自动进入全屏地图模式，确保 fitBounds 基于全屏尺寸
+          // 手机端首次加载：地图常驻可交互，fitBounds 基于当前尺寸（抽屉覆盖在上方）
           const isMob = window.matchMedia("(max-width: 768px)").matches;
-          if (isMob && !document.body.classList.contains("ui-collapsed")) {
-            document.body.classList.add("ui-collapsed");
-            syncMobilePanel(); // 切换地图拖拽/缩放 + invalidateSize，必须在 fitBounds 前执行
-          }
-          // Task 4：手机端预留底部数据条高度（约 130px），避免最新点/风圈被遮挡
+          // 手机端预留底部数据条高度（约 130px），避免最新点/风圈被遮挡
           const fitOpts = isMob
             ? { paddingTopLeft: [20, 20], paddingBottomRight: [20, 130], animate: true, duration: 0.8 }
             : { animate: true, duration: 0.8 };
@@ -3482,6 +3575,18 @@
       if (el.mcWind) {
         el.mcWind.classList.toggle("on", !!windOn);
         el.mcWind.disabled = el.windBtn ? el.windBtn.disabled : false;
+      }
+      // Task 3：同步底部抽屉 header 摘要 + 风圈按钮态
+      const msCity = document.getElementById("msCity");
+      const msDist = document.getElementById("msDist");
+      const msPhase = document.getElementById("msPhase");
+      const msWind = document.getElementById("msWind");
+      if (msCity) msCity.textContent = city;
+      if (msDist) msDist.textContent = dist;
+      if (msPhase) msPhase.textContent = phase;
+      if (msWind) {
+        msWind.classList.toggle("on", !!windOn);
+        msWind.disabled = el.windBtn ? el.windBtn.disabled : false;
       }
     }
 
@@ -3668,9 +3773,12 @@
 
       // 巅峰风圈最大半径
       let peakR = "";
-      if (peak.windCircles) {
-        const r = maxRadius(peak.windCircles.r7);
-        if (r > 0) peakR = `，7级风圈半径达 ${r} km`;
+      const peakWc = peak.windCircles || peak.estimatedWindCircles;
+      if (peakWc) {
+        const r = maxRadius(peakWc.r7);
+        // 仅估算（无观测）时标注「（估算）」，与弹窗/虚线呈现口径一致
+        const estTag = !peak.windCircles ? "（估算）" : "";
+        if (r > 0) peakR = `，7级风圈半径${estTag}达 ${r} km`;
       }
 
       el.lifeStats.innerHTML =
@@ -3828,8 +3936,9 @@
         : `「${tyName}」已停止编号（历史档案）。最后定位北纬 ${latest.lat.toFixed(1)}°、东经 ${latest.lng.toFixed(1)}°，距${cityName}约 ${formatNum(distance)} km；全程最靠近福建约 <strong>${fjMinCity ? formatNum(fjMin) + " km（" + fjMinCity.name + "）" : "—"}</strong>。`;
 
       // 风圈开关：按是否有风圈数据决定（近期已消散台风仍可能带风圈数据，不应一概禁用）
+      // 历史台风 p[10] 为空但有估算风圈时也启用按钮（虚线呈现）
       if (el.windBtn) {
-        const hasWind = points.some((p) => p.windCircles);
+        const hasWind = points.some((p) => p.windCircles || p.estimatedWindCircles);
         if (hasWind) {
           windOn = true;
           el.windBtn.classList.add("on");
@@ -3862,6 +3971,8 @@
       if (el.zoomLink) el.zoomLink.href = `https://zoom.earth/#view=${latest.lat.toFixed(2)},${latest.lng.toFixed(2)},6z`;
       if (el.windyLink) el.windyLink.href = `https://www.windy.com/?${latest.lat.toFixed(2)},${latest.lng.toFixed(2)},6`;
 
+      // Task 3.6：捕获 fitMap 标志——renderMap 内会消费并置 false，用于后续判断是否首次加载
+      const wasFitMap = state.fitMap;
       renderMap(points, latest, forecastPts);
       // Task 2：renderMap 内可能已自动收起进入全屏地图模式，同步浮动数据条数据/按钮态
       updateMobileChip();
@@ -3874,6 +3985,13 @@
         renderHistoricalImpact(info);
       }
       renderLifecycle(info);
+
+      // Task 3：刷新底部抽屉内容（克隆信息层关键板块到 #msBody）
+      if (typeof refreshSheetBody === "function") refreshSheetBody();
+      // Task 3.6：手机端首次加载（fitMap）后默认展开抽屉到半屏；后续刷新不强制重开
+      if (wasFitMap && window.matchMedia("(max-width: 768px)").matches && typeof setSnap === "function") {
+        setSnap("half");
+      }
 
       const now = new Date();
       el.updatedAt.textContent = `更新于 ${now.toLocaleString("zh-CN", { hour12: false })}`;
@@ -4398,9 +4516,16 @@
           .map((t) => {
             const en = t.enName && t.enName !== "nameless" ? " " + t.enName : "";
             const numTxt = t.no ? `${t.year}年第${t.no}号 ` : "";
+            // 无名兜底：name 与 enName 均空 → "未命名"；no=0 无名热带低压 → "热带低压"
+            let nameTxt = t.name;
+            if (!nameTxt && !en) nameTxt = "未命名";
+            if (!t.no) nameTxt = nameTxt || "热带低压";
+            // 无路径标记：仅当条目带 fjMin 字段（来自索引）且值为 null 时追加「（无路径）」
+            // fetchTyphoonList 返回的实时条目无 fjMin 键，不会误判
+            const noPath = ("fjMin" in t && t.fjMin == null) ? "（无路径）" : "";
             const tag = t.isActive ? "（活动）" : "（历史）";
             const sel = t.id === selectedTyphoonId ? " selected" : "";
-            return `<option value="${t.id}"${sel}>${numTxt}${t.name}${en}${tag}</option>`;
+            return `<option value="${t.id}"${sel}>${numTxt}${nameTxt}${en}${noPath}${tag}</option>`;
           })
           .join("")
         : `<option value="">该年份暂无台风数据</option>`;
@@ -4632,6 +4757,9 @@
       else map.removeLayer(layers.wind);
       // Task 2：同步浮动数据条风圈按钮态
       if (el.mcWind) el.mcWind.classList.toggle("on", windOn);
+      // Task 3：同步底部抽屉风圈按钮态
+      const msWind = document.getElementById("msWind");
+      if (msWind) msWind.classList.toggle("on", windOn);
     });
 
     el.obsBtn.addEventListener("click", () => {
@@ -4783,56 +4911,154 @@
         if (el.fsBtn) el.fsBtn.classList.toggle("active", !!document.fullscreenElement);
       });
     }
-    // 手机端面板状态同步：toggle 按钮态 + 地图拖拽/缩放 + invalidateSize。
-    // Task 1：使用函数声明被提升（hoist），renderMap 等任意位置均可安全调用，
-    // 不依赖 if (el.panelToggle) 块是否已执行。
+    // 手机端面板状态同步：Task 3/4 简化后只做 invalidateSize + chip 同步。
+    // 地图拖拽/缩放在手机端常驻启用（抽屉覆盖在地图之上，不挤压地图）。
     function syncMobilePanel() {
-      const collapsed = document.body.classList.contains("ui-collapsed");
-      const isMobile = window.matchMedia("(max-width: 768px)").matches;
-      if (el.panelToggle) {
-        el.panelToggle.classList.toggle("active", collapsed);
-        el.panelToggle.textContent = collapsed ? "展开" : "收起";
-      }
-      if (isMobile) {
-        if (collapsed) { map.dragging.enable(); map.touchZoom.enable(); }
-        else { map.dragging.disable(); map.touchZoom.disable(); }
-      }
-      map.invalidateSize();
-      // 同步浮动数据条（收起/展开切换后可见性与数据态可能变化）
-      updateMobileChip();
+      if (typeof map !== "undefined") map.invalidateSize();
+      if (typeof updateMobileChip === "function") updateMobileChip();
     }
 
-    if (el.panelToggle) {
-      el.panelToggle.addEventListener("click", () => {
-        document.body.classList.toggle("ui-collapsed");
-        syncMobilePanel();
-      });
-      // 初始同步：手机端默认关闭地图拖拽（允许页面滚动），PC 端保持开启
-      if (window.matchMedia("(max-width: 768px)").matches) {
-        map.dragging.disable();
-        map.touchZoom.disable();
-      }
-      syncMobilePanel();
-    }
-    // Task 2：浮动数据条按钮——风圈开关镜像 windBtn 逻辑；展开按钮恢复信息层
+    // 初始同步：手机端地图拖拽/缩放常驻启用（不再 disable）
+    syncMobilePanel();
+
+    // Task 2：浮动数据条按钮——风圈开关镜像 windBtn 逻辑
     if (el.mcWind) {
-      el.mcWind.addEventListener("click", () => {
+      el.mcWind.addEventListener("click", (e) => {
+        e.stopPropagation(); // 防止冒泡到 #mcData 触发抽屉展开
         if (el.mcWind.disabled) return;
         windOn = !windOn;
         if (el.windBtn) el.windBtn.classList.toggle("on", windOn);
         if (windOn) map.addLayer(layers.wind);
         else map.removeLayer(layers.wind);
         el.mcWind.classList.toggle("on", windOn);
+        // Task 3：同步底部抽屉风圈按钮态
+        const msWind = document.getElementById("msWind");
+        if (msWind) msWind.classList.toggle("on", windOn);
       });
     }
-    if (el.mcExpand) {
-      el.mcExpand.addEventListener("click", () => {
-        document.body.classList.remove("ui-collapsed");
-        syncMobilePanel();
+
+    // Task 3：可拖拽底部抽屉（3-snap：hidden/half/full）—— Google Maps 风格
+    const SNAP_ORDER = ["hidden", "half", "full"];
+    let currentSnap = "hidden";
+
+    function setSnap(snap) {
+      currentSnap = snap;
+      const sheet = document.getElementById("mobileSheet");
+      if (!sheet) return;
+      sheet.hidden = false;
+      sheet.classList.remove("snap-hidden", "snap-half", "snap-full", "dragging");
+      sheet.classList.add("snap-" + snap);
+      // body.sheet-open 用于隐藏底部 chip（避免重叠）
+      document.body.classList.toggle("sheet-open", snap !== "hidden");
+      if (snap === "hidden") {
+        // 延时隐藏避免动画闪烁
+        setTimeout(() => { if (currentSnap === "hidden") sheet.hidden = true; }, 280);
+      }
+      // 地图尺寸可能变化
+      if (typeof map !== "undefined") map.invalidateSize();
+      if (typeof updateMobileChip === "function") updateMobileChip();
+    }
+
+    // Task 3.3：刷新抽屉 body 内容（克隆信息层关键板块，只读视图，不动原 DOM 以保 PC 布局）
+    function refreshSheetBody() {
+      // PC 端抽屉 display:none，无需克隆（避免无谓 DOM 复制）
+      if (!window.matchMedia("(max-width: 768px)").matches) return;
+      const body = document.getElementById("msBody");
+      if (!body) return;
+      body.innerHTML = "";
+      const heroSection = document.querySelector(".hero");
+      const picks = [".distance", "#heroLine", "#situationBox", "#nextStrip", "#metaRow"];
+      const items = [];
+      if (heroSection) {
+        for (const sel of picks) {
+          const node = heroSection.querySelector(sel);
+          if (node) items.push(node);
+        }
+      }
+      items.push(document.getElementById("lifeBlock"));
+      items.push(document.getElementById("hourly"));
+      for (const src of items) {
+        if (!src) continue;
+        const clone = src.cloneNode(true);
+        clone.removeAttribute("id");
+        // 标记来源（便于 scrollCue 定位 hourly 克隆）
+        if (src.id === "hourly") clone.setAttribute("data-section", "hourly");
+        body.appendChild(clone);
+      }
+    }
+
+    // Task 3.2：抽屉 header 工具按钮镜像已有按钮逻辑
+    const msWind = document.getElementById("msWind");
+    const msObs = document.getElementById("msObs");
+    const msFit = document.getElementById("msFit");
+    const msRefresh = document.getElementById("msRefresh");
+    const msFs = document.getElementById("msFs");
+    if (msWind) msWind.addEventListener("click", (e) => { e.stopPropagation(); if (el.mcWind && !el.mcWind.disabled) el.mcWind.click(); else if (el.windBtn) el.windBtn.click(); });
+    if (msObs) msObs.addEventListener("click", (e) => { e.stopPropagation(); if (el.obsBtn) el.obsBtn.click(); });
+    if (msFit) msFit.addEventListener("click", (e) => { e.stopPropagation(); if (el.fitBtn) el.fitBtn.click(); });
+    if (msRefresh) msRefresh.addEventListener("click", (e) => { e.stopPropagation(); if (el.refreshBtn) el.refreshBtn.click(); });
+    if (msFs) msFs.addEventListener("click", (e) => { e.stopPropagation(); if (el.fsBtn) el.fsBtn.click(); });
+
+    // Task 3.5：抽屉手柄触摸/鼠标手势（拖拽切换 snap + 点按循环）
+    const msHandle = document.getElementById("msHandle");
+    if (msHandle) {
+      let dragStartY = 0, dragMoved = false, dragSheetH = 0;
+      msHandle.addEventListener("touchstart", (e) => {
+        dragStartY = e.touches[0].clientY;
+        dragMoved = false;
+        const sheet = document.getElementById("mobileSheet");
+        dragSheetH = sheet ? sheet.offsetHeight : 1;
+        if (sheet) sheet.classList.add("dragging");
+      }, { passive: true });
+      msHandle.addEventListener("touchmove", (e) => {
+        const dy = e.touches[0].clientY - dragStartY;
+        if (Math.abs(dy) > 5) dragMoved = true;
+        const basePct = { hidden: 100, half: 50, full: 8 }[currentSnap];
+        let pct = basePct + (dy / dragSheetH) * 100;
+        pct = Math.max(8, Math.min(100, pct));
+        const sheet = document.getElementById("mobileSheet");
+        if (sheet) sheet.style.transform = `translateY(${pct}%)`;
+      }, { passive: true });
+      msHandle.addEventListener("touchend", (e) => {
+        const sheet = document.getElementById("mobileSheet");
+        if (sheet) { sheet.classList.remove("dragging"); sheet.style.transform = ""; }
+        if (!dragMoved) {
+          // 点按：循环切换 hidden→half→full→hidden
+          const idx = SNAP_ORDER.indexOf(currentSnap);
+          setSnap(SNAP_ORDER[(idx + 1) % 3]);
+          return;
+        }
+        const dy = e.changedTouches[0].clientY - dragStartY;
+        if (dy < -30) {
+          // 向上拖：进阶
+          const idx = SNAP_ORDER.indexOf(currentSnap);
+          setSnap(SNAP_ORDER[Math.min(idx + 1, 2)]);
+        } else if (dy > 30) {
+          // 向下拖：降阶
+          const idx = SNAP_ORDER.indexOf(currentSnap);
+          setSnap(SNAP_ORDER[Math.max(idx - 1, 0)]);
+        } else {
+          setSnap(currentSnap); // 回弹
+        }
+      }, { passive: true });
+      // 鼠标支持（Puppeteer 测试用）
+      msHandle.addEventListener("click", (e) => {
+        if (dragMoved) return;
+        const idx = SNAP_ORDER.indexOf(currentSnap);
+        setSnap(SNAP_ORDER[(idx + 1) % 3]);
       });
     }
-    // 地图点击：测距落点 / 移动端收起展开信息层（合并两处监听，D5）
-    // 交互图层 click 不冒泡，不会误触；测距中不切换面板
+
+    // Task 3.7：点击 #mobileChip 数据区展开抽屉到半屏
+    const mcData = document.getElementById("mcData");
+    if (mcData) {
+      mcData.addEventListener("click", () => {
+        setSnap("half");
+      });
+    }
+
+    // 地图点击：测距落点（合并两处监听，D5）。
+    // Task 4.2：移动端地图点击不再切换面板，仅处理测距 + _blockPanelToggle 复位。
     map.on("click", (e) => {
       if (measuring) {
         measurePts.push(e.latlng);
@@ -4855,39 +5081,30 @@
         return;
       }
       if (_blockPanelToggle) { _blockPanelToggle = false; return; }
-      if (window.matchMedia("(max-width: 768px)").matches) {
-        document.body.classList.toggle("ui-collapsed");
-        const collapsed = document.body.classList.contains("ui-collapsed");
-        if (el.panelToggle) {
-          el.panelToggle.classList.toggle("active", collapsed);
-          el.panelToggle.textContent = collapsed ? "展开" : "收起";
-        }
-        // 手机端地图点击切换拖拽
-        if (collapsed) { map.dragging.enable(); map.touchZoom.enable(); }
-        else { map.dragging.disable(); map.touchZoom.disable(); }
-        map.invalidateSize();
-      }
     });
 
-    // 逐小时滚动提示：平滑滚动并自动展开面板
+    // Task 4.3：逐小时滚动提示——打开抽屉全屏并定位到 hourly 克隆
     const scrollCue = document.querySelector(".scroll-cue");
     if (scrollCue) {
       scrollCue.addEventListener("click", (ev) => {
         const target = document.getElementById("hourly");
         if (!target) return;
         ev.preventDefault();
-        // 如果面板收起中，先展开
-        if (document.body.classList.contains("ui-collapsed")) {
-          document.body.classList.remove("ui-collapsed");
-          const isMobile = window.matchMedia("(max-width: 768px)").matches;
-          if (isMobile) { map.dragging.disable(); map.touchZoom.disable(); }
-          if (el.panelToggle) {
-            el.panelToggle.classList.remove("active");
-            el.panelToggle.textContent = "收起";
-          }
+        // 手机端：打开抽屉到全屏，并在抽屉内滚动到 hourly 克隆
+        if (window.matchMedia("(max-width: 768px)").matches) {
+          setSnap("full");
+          refreshSheetBody();
+          setTimeout(() => {
+            const body = document.getElementById("msBody");
+            const clone = body ? body.querySelector('[data-section="hourly"]') : null;
+            if (clone) clone.scrollIntoView({ behavior: "smooth", block: "start" });
+          }, 300);
+          if (typeof map !== "undefined") map.invalidateSize();
+          return;
         }
+        // PC 端：保持原行为（平滑滚动到 #hourly）
         target.scrollIntoView({ behavior: "smooth", block: "start" });
-        map.invalidateSize();
+        if (typeof map !== "undefined") map.invalidateSize();
       });
     }
     document.addEventListener("visibilitychange", () => {
@@ -4897,16 +5114,9 @@
     window.addEventListener("resize", () => {
       map.invalidateSize();
       if (lastBounds) map.fitBounds(lastBounds, { animate: false });
-      // 窗口大小变化时同步手机端地图拖拽状态
-      const isMobile = window.matchMedia("(max-width: 768px)").matches;
-      const collapsed = document.body.classList.contains("ui-collapsed");
-      if (isMobile) {
-        if (collapsed) { map.dragging.enable(); map.touchZoom.enable(); }
-        else { map.dragging.disable(); map.touchZoom.disable(); }
-      } else {
-        map.dragging.enable();
-        map.touchZoom.enable();
-      }
+      // Task 4：地图拖拽/缩放常驻启用，不再根据 ui-collapsed 切换
+      map.dragging.enable();
+      map.touchZoom.enable();
     });
 
     setTimeout(() => map.invalidateSize(), 120);
