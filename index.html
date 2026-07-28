@@ -2109,35 +2109,46 @@
         min-width: 44px;
       }
 
-      /* 手机端底部下箭头 tab + 信息面板双态 */
+      /* 手机端左上角双态箭头：收起时浮于地图，展开时叠在面板左上角作为关闭按钮
+         放左上角避开 iPhone 底部 Home Indicator 与华为底部导航手势 */
       #msToggle {
-        display: block;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         position: fixed;
-        left: 50%;
-        bottom: 10px;
-        transform: translateX(-50%);
+        top: calc(env(safe-area-inset-top) + 8px);
+        left: max(8px, env(safe-area-inset-left));
         z-index: 1301;
-        width: 48px;
-        height: 32px;
+        width: 44px;
+        height: 44px;
         padding: 0;
         background: rgba(13, 26, 36, 0.92);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border: 1px solid rgba(127, 212, 200, 0.3);
-        border-radius: 16px;
+        border-radius: 12px;
         color: #7FD4C8;
-        font-size: 18px;
+        font-size: 22px;
         line-height: 1;
         cursor: pointer;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
         touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
       }
 
+      /* 扩大触摸区到 60×60，覆盖刘海/状态栏附近误触容忍 */
       #msToggle::before {
         content: "";
         position: absolute;
-        left: -10px;
-        right: -10px;
-        top: -12px;
+        left: -8px;
+        right: -8px;
+        top: -8px;
         bottom: -8px;
+      }
+
+      /* hidden 属性优先于 display:flex，确保收起后真正隐藏（不遮挡 brand-mark） */
+      #msToggle[hidden] {
+        display: none !important;
       }
 
       #mobileSheet {
@@ -2147,6 +2158,7 @@
         bottom: 0;
         z-index: 1300;
         height: 92vh;
+        height: 92dvh;
         background: rgba(13, 26, 36, 0.98);
         border-top: 1px solid rgba(127, 212, 200, 0.25);
         border-radius: 16px 16px 0 0;
@@ -2172,6 +2184,11 @@
         overflow-y: auto;
         padding: 12px 14px 14px;
         -webkit-overflow-scrolling: touch;
+      }
+
+      /* 展开时为左上角 toggle 让出空间，避免 cityTabs 被遮挡 */
+      #mobileSheet.expanded .ms-body {
+        padding-top: 56px;
       }
     }
 
@@ -4843,13 +4860,10 @@
     }
     // 手机端面板状态同步：Task 3/4 简化后只做 invalidateSize + chip 同步。
     // 地图拖拽/缩放在手机端常驻启用（抽屉覆盖在地图之上，不挤压地图）。
+    // msToggle 不再随 mobileChip 显隐——它只在面板展开时作为左上角关闭按钮出现。
     function syncMobilePanel() {
       if (typeof map !== "undefined") map.invalidateSize();
       if (typeof updateMobileChip === "function") updateMobileChip();
-      // msToggle 随 mobileChip 一起显隐
-      const mt = document.getElementById("msToggle");
-      const chip = document.getElementById("mobileChip");
-      if (mt && chip) mt.hidden = chip.hidden;
     }
 
     // 初始同步：手机端地图拖拽/缩放常驻启用（不再 disable）
@@ -4879,16 +4893,23 @@
       if (expand) {
         sheet.hidden = false;
         sheet.classList.add("expanded");
+        // 左上角关闭按钮：仅展开时出现
+        toggle.hidden = false;
         toggle.textContent = "△";
         toggle.setAttribute("aria-label", "收起信息面板");
         document.body.classList.add("sheet-expanded");
         if (typeof refreshSheetBody === "function") refreshSheetBody();
       } else {
         sheet.classList.remove("expanded");
-        toggle.textContent = "▽";
-        toggle.setAttribute("aria-label", "展开信息面板");
+        toggle.textContent = "△";
+        toggle.setAttribute("aria-label", "收起信息面板");
         document.body.classList.remove("sheet-expanded");
-        setTimeout(() => { if (!sheetExpanded) sheet.hidden = true; }, 300);
+        setTimeout(() => {
+          if (!sheetExpanded) {
+            sheet.hidden = true;
+            toggle.hidden = true; // 收起后隐藏，避免遮挡 brand-mark
+          }
+        }, 300);
       }
       if (typeof map !== "undefined") map.invalidateSize();
       if (typeof updateMobileChip === "function") updateMobileChip();

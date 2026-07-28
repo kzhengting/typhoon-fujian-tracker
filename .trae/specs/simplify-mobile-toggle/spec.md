@@ -12,11 +12,14 @@
 - 移除 touch 拖动手势（touchstart/move/end）与 `isInHeader`/`isBtn` 判定
 - 移除 `refreshSheetBody()` 的复杂克隆逻辑（简化）
 
-### B. 新增底部下箭头 tab（双态切换）
-- 新增 `#msToggle` 按钮：底部正中浮动，下箭头 ▽ 图标，48×32px 触摸区
-- 点 tab 展开 `#mobileSheet`（translateY 0，92vh，body 可滚动），图标变上箭头 △
-- 再点 tab 或点地图空白 → 收起（translateY 100%），图标变 ▽
+### B. 新增左上角关闭箭头（双态切换）
+- 新增 `#msToggle` 按钮：**左上角浮动**（`top: calc(env(safe-area-inset-top)+8px); left: max(8px, env(safe-area-inset-left))`），44×44px 触摸区（::before 扩到 60×60）
+- **仅展开态可见**：收起时 `hidden` 隐藏（避免遮挡 brand-mark），展开时作为左上角关闭按钮出现
+- 图标恒为 △（上箭头，表示收起）；点 △ 收起面板，或点地图空白收起
+- 放左上角避开 iPhone Home Indicator 与华为底部导航手势（底部正中真机不可控）
+- 点 mobileChip 数据区展开 `#mobileSheet`（translateY 0，92dvh，body 可滚动）
 - 面板内容：clone hero 板块（cityTabs 地市切换 + distance 距离 + heroLine 描述 + situationBox 态势 + lifeBlock 生命周期 + hourly 逐小时）
+- 展开时 `#msBody` padding-top: 56px，为左上角 toggle 让出空间
 
 ### C. mobileChip 保留 + 新增全屏按钮
 - 保留 `#mobileChip`（顶部浮动数据条：城市·距离·相位 + 风圈开关 `#mcWind`）
@@ -36,16 +39,16 @@
 
 ## ADDED Requirements
 
-### Requirement: 底部下箭头 tab 双态切换
-手机端底部正中 SHALL 有一个下箭头 tab（`#msToggle`），点按在收起/展开两态间切换。
+### Requirement: 左上角关闭箭头（仅展开态）
+手机端信息面板展开时 SHALL 在左上角显示关闭箭头 `#msToggle`（△ 图标），收起时隐藏。位置避开 iPhone 底部 Home Indicator 与华为底部导航手势。
 
-#### Scenario: 收起态点 tab 展开
-- **WHEN** 信息面板收起，用户点底部 ▽ tab
-- **THEN** 面板从底部上拉到 92vh，body 可滚动，tab 图标变 △
+#### Scenario: 收起态点 mobileChip 展开
+- **WHEN** 信息面板收起，用户点底部 mobileChip 数据区
+- **THEN** 面板从底部上拉到 92dvh，body 可滚动，左上角出现 △ 关闭按钮
 
-#### Scenario: 展开态点 tab 收起
-- **WHEN** 信息面板展开，用户点顶部 △ tab
-- **THEN** 面板下滑收起，地图全屏可见，tab 图标变 ▽
+#### Scenario: 展开态点 △ 收起
+- **WHEN** 信息面板展开，用户点左上角 △ 关闭按钮
+- **THEN** 面板下滑收起，地图全屏可见，△ 按钮隐藏
 
 #### Scenario: 点地图空白收起
 - **WHEN** 信息面板展开，用户点地图空白区域
@@ -68,7 +71,7 @@ mobileChip SHALL 有全屏按钮 `#mcFs`，点击触发浏览器全屏并收起�
 ## MODIFIED Requirements
 
 ### Requirement: 手机端信息展示
-手机端默认全屏地图（路径+风圈），底部浮动 ▽ tab 与顶部 mobileChip（城市·距离·相位 + 风圈开关 + 全屏按钮）。点 ▽ tab 展开信息面板看生命周期/地市影响/逐小时。无 3 档吸附、无工具行菜单。触摸目标 ≥ 44px。
+手机端默认全屏地图（路径+风圈），底部 mobileChip（城市·距离·相位 + 风圈开关 + 全屏按钮）。点 mobileChip 展开信息面板看生命周期/地市影响/逐小时，左上角出现 △ 关闭按钮。无 3 档吸附、无工具行菜单。触摸目标 ≥ 44px。适配 iPhone（刘海/Home Indicator）与华为（状态栏/导航手势）safe-area。
 
 ## REMOVED Requirements
 
