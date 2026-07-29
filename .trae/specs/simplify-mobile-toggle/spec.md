@@ -12,12 +12,13 @@
 - 移除 touch 拖动手势（touchstart/move/end）与 `isInHeader`/`isBtn` 判定
 - 移除 `refreshSheetBody()` 的复杂克隆逻辑（简化）
 
-### B. 新增左上角关闭箭头（双态切换）
+### B. 新增左上角双态箭头（▽展开/△收起）
 - 新增 `#msToggle` 按钮：**左上角浮动**（`top: calc(env(safe-area-inset-top)+8px); left: max(8px, env(safe-area-inset-left))`），44×44px 触摸区（::before 扩到 60×60）
-- **仅展开态可见**：收起时 `hidden` 隐藏（避免遮挡 brand-mark），展开时作为左上角关闭按钮出现
-- 图标恒为 △（上箭头，表示收起）；点 △ 收起面板，或点地图空白收起
+- **台风加载后常驻左上角**（与 mobileChip 一起显隐，由 `updateMobileChip` 统一控制）：▽ 收起态点按展开，△ 展开态点按收起
 - 放左上角避开 iPhone Home Indicator 与华为底部导航手势（底部正中真机不可控）
-- 点 mobileChip 数据区展开 `#mobileSheet`（translateY 0，92dvh，body 可滚动）
+- 无台风时 `hidden` 隐藏（`#msToggle[hidden] { display:none !important }` 确保 display:flex 不覆盖）
+- 台风加载后 `body.ty-active` 触发 brand-mark `padding-left: 52px` 让出空间
+- 点 mobileChip 数据区也可展开 `#mobileSheet`（translateY 0，92dvh，body 可滚动）
 - 面板内容：clone hero 板块（cityTabs 地市切换 + distance 距离 + heroLine 描述 + situationBox 态势 + lifeBlock 生命周期 + hourly 逐小时）
 - 展开时 `#msBody` padding-top: 56px，为左上角 toggle 让出空间
 
@@ -39,16 +40,16 @@
 
 ## ADDED Requirements
 
-### Requirement: 左上角关闭箭头（仅展开态）
-手机端信息面板展开时 SHALL 在左上角显示关闭箭头 `#msToggle`（△ 图标），收起时隐藏。位置避开 iPhone 底部 Home Indicator 与华为底部导航手势。
+### Requirement: 左上角双态箭头（▽展开/△收起）
+手机端台风加载后 SHALL 在左上角常驻 `#msToggle` 箭头按钮：▽ 表示可展开信息面板，△ 表示可收起。位置避开 iPhone 底部 Home Indicator 与华为底部导航手势。无台风时隐藏。
 
-#### Scenario: 收起态点 mobileChip 展开
-- **WHEN** 信息面板收起，用户点底部 mobileChip 数据区
-- **THEN** 面板从底部上拉到 92dvh，body 可滚动，左上角出现 △ 关闭按钮
+#### Scenario: 收起态点 ▽ 展开
+- **WHEN** 台风已加载，信息面板收起，用户点左上角 ▽
+- **THEN** 面板从底部上拉到 92dvh，body 可滚动，箭头变 △
 
 #### Scenario: 展开态点 △ 收起
-- **WHEN** 信息面板展开，用户点左上角 △ 关闭按钮
-- **THEN** 面板下滑收起，地图全屏可见，△ 按钮隐藏
+- **WHEN** 信息面板展开，用户点左上角 △
+- **THEN** 面板下滑收起，地图全屏可见，箭头变 ▽
 
 #### Scenario: 点地图空白收起
 - **WHEN** 信息面板展开，用户点地图空白区域

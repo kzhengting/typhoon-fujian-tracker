@@ -1814,6 +1814,11 @@
         font-size: clamp(1.7rem, 8vw, 2.2rem);
       }
 
+      /* 台风加载后左上角 ▽ 按钮常驻，为它让出空间避免遮挡标题 */
+      body.ty-active .brand-mark {
+        padding-left: 52px;
+      }
+
       .brand-sub {
         font-size: 0.66rem;
         letter-spacing: 0.14em;
@@ -2032,6 +2037,11 @@
       /* 抽屉展开时隐藏底部数据条，避免重叠 */
       body.sheet-expanded #mobileChip {
         display: none;
+      }
+
+      /* hidden 属性优先于 display:flex，无台风时真正隐藏（不显示空数据条） */
+      #mobileChip[hidden] {
+        display: none !important;
       }
 
       #mobileChip .mc-data {
@@ -3528,6 +3538,11 @@
     // Task 2：从已有 DOM/状态读取，保持 chip 与 hero/situation/windBtn 一致
     function updateMobileChip() {
       if (!el.mcCity) return; // PC 端无此元素，直接跳过
+      // 按是否有台风数据控制 chip（及联动的 msToggle）显隐
+      const hasTyphoon = !!(state.info && state.info.path && state.info.path.length);
+      document.body.classList.toggle("ty-active", hasTyphoon);
+      const chip = document.getElementById("mobileChip");
+      if (chip) chip.hidden = !hasTyphoon;
       const city = (el.legendCity && el.legendCity.textContent) ||
         (el.impactCity && el.impactCity.textContent) || "—";
       const d = state.lastDistance;
@@ -3543,6 +3558,9 @@
         el.mcWind.classList.toggle("on", !!windOn);
         el.mcWind.disabled = el.windBtn ? el.windBtn.disabled : false;
       }
+      // 同步 msToggle 显隐（与 chip 一致）
+      const mt = document.getElementById("msToggle");
+      if (mt) mt.hidden = chip ? chip.hidden : !hasTyphoon;
     }
 
     // 统一的24小时时间格式化（仅格式无日期）
@@ -4858,9 +4876,8 @@
         if (el.fsBtn) el.fsBtn.classList.toggle("active", !!document.fullscreenElement);
       });
     }
-    // 手机端面板状态同步：Task 3/4 简化后只做 invalidateSize + chip 同步。
+    // 手机端面板状态同步：只做 invalidateSize + chip/toggle 显隐（由 updateMobileChip 统一处理）。
     // 地图拖拽/缩放在手机端常驻启用（抽屉覆盖在地图之上，不挤压地图）。
-    // msToggle 不再随 mobileChip 显隐——它只在面板展开时作为左上角关闭按钮出现。
     function syncMobilePanel() {
       if (typeof map !== "undefined") map.invalidateSize();
       if (typeof updateMobileChip === "function") updateMobileChip();
@@ -4893,23 +4910,16 @@
       if (expand) {
         sheet.hidden = false;
         sheet.classList.add("expanded");
-        // 左上角关闭按钮：仅展开时出现
-        toggle.hidden = false;
         toggle.textContent = "△";
         toggle.setAttribute("aria-label", "收起信息面板");
         document.body.classList.add("sheet-expanded");
         if (typeof refreshSheetBody === "function") refreshSheetBody();
       } else {
         sheet.classList.remove("expanded");
-        toggle.textContent = "△";
-        toggle.setAttribute("aria-label", "收起信息面板");
+        toggle.textContent = "▽";
+        toggle.setAttribute("aria-label", "展开信息面板");
         document.body.classList.remove("sheet-expanded");
-        setTimeout(() => {
-          if (!sheetExpanded) {
-            sheet.hidden = true;
-            toggle.hidden = true; // 收起后隐藏，避免遮挡 brand-mark
-          }
-        }, 300);
+        setTimeout(() => { if (!sheetExpanded) sheet.hidden = true; }, 300);
       }
       if (typeof map !== "undefined") map.invalidateSize();
       if (typeof updateMobileChip === "function") updateMobileChip();
