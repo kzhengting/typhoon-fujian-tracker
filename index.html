@@ -2342,7 +2342,6 @@
         </div>
         <div class="mc-actions">
           <button type="button" id="mcWind" class="mc-btn on" title="显示 / 隐藏 7/10/12 级风圈">风圈</button>
-          <button type="button" id="mcFs" class="mc-btn" title="全屏看地图">全屏</button>
         </div>
       </div>
 
@@ -4984,16 +4983,6 @@
     if (msToggle) {
       msToggle.addEventListener("click", () => {
         toggleSheet(!sheetExpanded);
-      });
-    }
-
-    // mobileChip 全屏按钮：浏览器全屏 + 收起面板
-    const mcFs = document.getElementById("mcFs");
-    if (mcFs) {
-      mcFs.addEventListener("click", (e) => {
-        e.stopPropagation();
-        if (el.fsBtn) el.fsBtn.click();
-        if (typeof sheetExpanded !== "undefined" && sheetExpanded) toggleSheet(false);
       });
     }
 
