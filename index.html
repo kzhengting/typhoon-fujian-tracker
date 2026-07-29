@@ -1777,6 +1777,23 @@
         min-height: 100dvh;
       }
 
+      /* Map-first：hero 详情块只保留在抽屉，页面流仅留选择条（ty-row + ty-search + errorBanner） */
+      .hero .ty-ident,
+      .hero .hero-label,
+      .hero .distance,
+      .hero .hero-line,
+      .hero .situation,
+      .hero .next-strip,
+      .hero .meta-row {
+        display: none;
+      }
+
+      /* footer 统计/工具栏 + scroll-cue 收进抽屉，让 1fr map-gap 占满视口 */
+      .ui>footer,
+      .ui>.scroll-cue {
+        display: none;
+      }
+
       /* 手机端：地图容器始终可交互（Task 3：抽屉覆盖在地图之上，地图拖拽常驻启用）。
          仅交互图层（marker 图标 leaflet-marker-pane、leaflet-interactive 矢量）原本就可点击。 */
       #map {
@@ -2199,6 +2216,19 @@
       /* 展开时为左上角 toggle 让出空间，避免 cityTabs 被遮挡 */
       #mobileSheet.expanded .ms-body {
         padding-top: 56px;
+      }
+
+      /* 抽屉内克隆的 footer 统计/工具栏排版 */
+      #mobileSheet .ms-body .stats {
+        margin: 0.6rem 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: rgba(8, 24, 34, 0.55);
+      }
+
+      #mobileSheet .ms-body .toolbar-actions {
+        margin: 0.6rem 0 0.2rem;
       }
     }
 
@@ -3366,9 +3396,10 @@
         if (state.fitMap) {
           // 手机端首次加载：地图常驻可交互，fitBounds 基于当前尺寸（抽屉覆盖在上方）
           const isMob = window.matchMedia("(max-width: 768px)").matches;
-          // 手机端预留底部数据条高度（约 130px），避免最新点/风圈被遮挡
+          // Map-first 布局：顶部预留紧凑选择条（header+city-tabs+ty-row+ty-search 约 230px），
+          // 底部预留 mobileChip 数据条 + 安全区（约 150px），路径落在可见带内
           const fitOpts = isMob
-            ? { paddingTopLeft: [20, 20], paddingBottomRight: [20, 130], animate: true, duration: 0.8 }
+            ? { paddingTopLeft: [20, 230], paddingBottomRight: [20, 150], animate: true, duration: 0.8 }
             : { animate: true, duration: 0.8 };
           map.fitBounds(lastBounds, fitOpts);
           state.fitMap = false;
@@ -4945,9 +4976,9 @@
           });
         });
       }
-      // hero 板块
+      // hero 板块（含 ty-ident 台风编号/名称/徽标）
       const heroSection = document.querySelector(".hero");
-      const picks = [".distance", "#heroLine", "#situationBox", "#nextStrip", "#metaRow"];
+      const picks = [".ty-ident", ".distance", "#heroLine", "#situationBox", "#nextStrip", "#metaRow"];
       if (heroSection) {
         for (const sel of picks) {
           const node = heroSection.querySelector(sel);
@@ -4957,6 +4988,34 @@
             body.appendChild(clone);
           }
         }
+      }
+      // footer 统计四宫格（强度/气压/风速/移向）——纯展示，去 id 防重复
+      const stats = document.querySelector("footer .stats");
+      if (stats) {
+        const sClone = stats.cloneNode(true);
+        sClone.querySelectorAll("[id]").forEach((n) => n.removeAttribute("id"));
+        body.appendChild(sClone);
+      }
+      // footer 工具栏按钮（风圈/点位/刷新/框选）——克隆后按 id 回绑原按钮
+      const footerActions = document.querySelector("footer .toolbar-actions");
+      if (footerActions) {
+        const faClone = footerActions.cloneNode(true);
+        faClone.querySelectorAll("button").forEach((btn) => {
+          const orig = btn.id ? document.getElementById(btn.id) : null;
+          btn.removeAttribute("id");
+          if (!orig) return;
+          btn.addEventListener("click", () => {
+            orig.click();
+            if (orig.id === "fitBtn" || orig.id === "refreshBtn") {
+              setTimeout(() => toggleSheet(false), 120); // 框选/刷新 → 收起看地图
+            } else {
+              setTimeout(() => refreshSheetBody(), 120); // 风圈/点位 → 刷新 .on 态
+            }
+          });
+        });
+        const ua = faClone.querySelector("#updatedAt");
+        if (ua) ua.removeAttribute("id");
+        body.appendChild(faClone);
       }
       // 生命周期 + 逐小时
       for (const id of ["lifeBlock", "hourly"]) {
