@@ -744,6 +744,11 @@
       color: var(--foam-hot);
     }
 
+    /* display:flex 会覆盖 [hidden]，需显式守卫：搜索框为空时 × 真正隐藏 */
+    .ty-search-clear[hidden] {
+      display: none !important;
+    }
+
     .ty-scope {
       display: flex;
       gap: 0.4rem;
@@ -1792,6 +1797,11 @@
       .ui>footer,
       .ui>.scroll-cue {
         display: none;
+      }
+
+      /* iPhone Safari 不支持 requestFullscreen()，Android 地址栏自动隐藏，全屏按钮在手机端无效 */
+      #fsBtn {
+        display: none !important;
       }
 
       /* 手机端：地图容器始终可交互（Task 3：抽屉覆盖在地图之上，地图拖拽常驻启用）。
@@ -4569,6 +4579,13 @@
       state.info = info;
       updateCityLabels();
       renderData(info, weather);
+      // 手机端：选台风后自动滚动到地图区域（map-gap），让地图成为首屏主视图
+      if (window.matchMedia("(max-width: 768px)").matches) {
+        setTimeout(() => {
+          const gap = document.querySelector(".map-gap");
+          if (gap) gap.scrollIntoView({ behavior: "smooth", block: "start" });
+        }, 300);
+      }
     }
 
     async function load() {
