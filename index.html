@@ -926,8 +926,9 @@
       align-items: center;
     }
 
-    /* 浮动数据条 + 底部抽屉仅手机端显示，PC 端完全不渲染（Task 2/3 零回归） */
-    @media (min-width: 769px) {
+    /* 浮动数据条 + 底部抽屉仅手机端显示，PC 端完全不渲染
+       加 pointer:fine 守卫：触屏设备横屏（视口>768px 但 pointer:coarse）仍显示移动 UI */
+    @media (min-width: 769px) and (pointer: fine) {
 
       #mobileChip,
       #mobileSheet,
@@ -1768,7 +1769,9 @@
       }
     }
 
-    @media (max-width: 768px) {
+    /* 移动端 CSS：视口≤768px 或触屏设备（pointer:coarse，覆盖横屏>768px） */
+    @media (max-width: 768px),
+    (pointer: coarse) {
       .ui {
         padding:
           max(0.7rem, env(safe-area-inset-top)) max(0.7rem, env(safe-area-inset-right)) max(0.45rem, env(safe-area-inset-bottom)) max(0.7rem, env(safe-area-inset-left));
@@ -2171,6 +2174,8 @@
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
         touch-action: manipulation;
         -webkit-tap-highlight-color: transparent;
+        /* 显式覆盖 .ui 祖先的 pointer-events:none，确保按钮可接收触摸/点击事件 */
+        pointer-events: auto;
       }
 
       /* 扩大触摸区到 60×60，覆盖刘海/状态栏附近误触容忍 */
@@ -2181,11 +2186,38 @@
         right: -8px;
         top: -8px;
         bottom: -8px;
+        /* 伪元素也需显式 auto，否则会吞掉触摸事件导致只有 44×44 中心区可点 */
+        pointer-events: auto;
       }
 
       /* hidden 属性优先于 display:flex，确保收起后真正隐藏（不遮挡 brand-mark） */
       #msToggle[hidden] {
         display: none !important;
+      }
+
+      /* 台风加载后 ▽ 脉冲 3 次，引导用户注意 */
+      @keyframes msPulse {
+
+        0%,
+        100% {
+          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        50% {
+          box-shadow: 0 2px 20px rgba(127, 212, 200, 0.6);
+        }
+      }
+
+      body.ty-active #msToggle {
+        animation: msPulse 1.5s ease-in-out 3;
+      }
+
+      /* 无台风时面板提示 */
+      .ms-hint {
+        padding: 2rem 1rem;
+        text-align: center;
+        color: var(--ink-dim);
+        font-size: 0.9rem;
       }
 
       #mobileSheet {
@@ -2386,7 +2418,7 @@
       </div>
 
       <!-- 手机端底部下箭头 tab：点按展开/收起信息面板 -->
-      <button type="button" id="msToggle" class="ms-toggle" aria-label="展开/收起信息面板" hidden>▽</button>
+      <button type="button" id="msToggle" class="ms-toggle" aria-label="展开/收起信息面板">▽</button>
 
       <!-- 手机端信息面板（双态：收起/展开） -->
       <div id="mobileSheet" class="mobile-sheet" hidden>
@@ -3179,7 +3211,7 @@
       layers.wind.clearLayers();
       if (!point || (!point.windCircles && !point.estimatedWindCircles)) return;
       // 手机端：点击路径点看风圈时收起信息面板，露出全图查看风圈
-      if (window.matchMedia("(max-width: 768px)").matches && typeof sheetExpanded !== "undefined" && sheetExpanded) {
+      if (window.matchMedia("(max-width: 768px), (pointer: coarse)").matches && typeof sheetExpanded !== "undefined" && sheetExpanded) {
         toggleSheet(false);
       }
       const c = center && Number.isFinite(center[0]) && Number.isFinite(center[1])
@@ -3405,7 +3437,7 @@
         lastBounds = L.latLngBounds(all).pad(0.16);
         if (state.fitMap) {
           // 手机端首次加载：地图常驻可交互，fitBounds 基于当前尺寸（抽屉覆盖在上方）
-          const isMob = window.matchMedia("(max-width: 768px)").matches;
+          const isMob = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
           // Map-first 布局：顶部预留紧凑选择条（header+city-tabs+ty-row+ty-search 约 230px），
           // 底部预留 mobileChip 数据条 + 安全区（约 150px），路径落在可见带内
           const fitOpts = isMob
@@ -3598,9 +3630,9 @@
         el.mcWind.classList.toggle("on", !!windOn);
         el.mcWind.disabled = el.windBtn ? el.windBtn.disabled : false;
       }
-      // 同步 msToggle 显隐（与 chip 一致）
+      // msToggle 始终可见（移动端常驻），不依赖 hasTyphoon——确保用户总能找到 ▽
       const mt = document.getElementById("msToggle");
-      if (mt) mt.hidden = chip ? chip.hidden : !hasTyphoon;
+      if (mt) mt.hidden = false;
     }
 
     // 统一的24小时时间格式化（仅格式无日期）
@@ -4580,7 +4612,7 @@
       updateCityLabels();
       renderData(info, weather);
       // 手机端：选台风后自动滚动到地图区域（map-gap），让地图成为首屏主视图
-      if (window.matchMedia("(max-width: 768px)").matches) {
+      if (window.matchMedia("(max-width: 768px), (pointer: coarse)").matches) {
         setTimeout(() => {
           const gap = document.querySelector(".map-gap");
           if (gap) gap.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -4974,10 +5006,19 @@
 
     // 信息面板内容：克隆 hero 源板块（含 cityTabs/距离/态势/生命周期/逐小时）
     function refreshSheetBody() {
-      if (!window.matchMedia("(max-width: 768px)").matches) return;
+      if (!window.matchMedia("(max-width: 768px), (pointer: coarse)").matches) return;
       const body = document.getElementById("msBody");
       if (!body) return;
       body.innerHTML = "";
+      // 无台风时显示提示，不克隆空数据块
+      const hasTyphoon = !!(state.info && state.info.path && state.info.path.length);
+      if (!hasTyphoon) {
+        const hint = document.createElement("div");
+        hint.className = "ms-hint";
+        hint.textContent = "请先在顶部选择台风";
+        body.appendChild(hint);
+        return;
+      }
       // cityTabs 地市切换
       const cityTabs = document.getElementById("cityTabs");
       if (cityTabs) {
@@ -5100,7 +5141,7 @@
         if (!target) return;
         ev.preventDefault();
         // 手机端：打开抽屉到全屏，并在抽屉内滚动到 hourly 克隆
-        if (window.matchMedia("(max-width: 768px)").matches) {
+        if (window.matchMedia("(max-width: 768px), (pointer: coarse)").matches) {
           toggleSheet(true);
           refreshSheetBody();
           setTimeout(() => {
