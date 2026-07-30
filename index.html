@@ -2168,7 +2168,7 @@
         border: 1px solid rgba(127, 212, 200, 0.3);
         border-radius: 12px;
         color: #7FD4C8;
-        font-size: 22px;
+        font-size: 16px;
         line-height: 1;
         cursor: pointer;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
@@ -5095,12 +5095,22 @@
       });
     }
 
-    // 底部 ▽ tab 点按切换展开/收起
+    // ▽ 切换顶部 UI（选台风对话框）的显隐，收起后露出全屏地图
+    function toggleTopUI() {
+      const collapsed = document.body.classList.toggle("ui-collapsed");
+      const toggle = document.getElementById("msToggle");
+      if (toggle) {
+        toggle.textContent = collapsed ? "△" : "▽";
+        toggle.setAttribute("aria-label", collapsed ? "展开顶部选择栏" : "收起顶部选择栏");
+      }
+      if (typeof map !== "undefined") {
+        setTimeout(() => map.invalidateSize(), 50);
+      }
+    }
+
     const msToggle = document.getElementById("msToggle");
     if (msToggle) {
-      msToggle.addEventListener("click", () => {
-        toggleSheet(!sheetExpanded);
-      });
+      msToggle.addEventListener("click", toggleTopUI);
     }
 
     // 地图点击：测距落点（合并两处监听，D5）。
