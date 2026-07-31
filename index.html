@@ -2888,9 +2888,19 @@
       const lng = Number(f[2]);
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
       const level = f[7];
+      const lead = Number(f[0]);
+      // f[1] 是预报发布时间（UTC），所有预测点相同；预计到达时间 = 发布时间 + lead 小时
+      const issueMs = String(f[1] || "").match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})$/);
+      const arrival = issueMs
+        ? new Date(Date.UTC(+issueMs[1], +issueMs[2] - 1, +issueMs[3], +issueMs[4], +issueMs[5]) + (8 + lead) * 3600 * 1000)
+        : null;
+      const p2 = (n) => String(n).padStart(2, "0");
+      const arrivalStr = arrival
+        ? `${arrival.getUTCFullYear()}-${p2(arrival.getUTCMonth() + 1)}-${p2(arrival.getUTCDate())} ${p2(arrival.getUTCHours())}:${p2(arrival.getUTCMinutes())}`
+        : nmcTime(f[1]);
       return {
-        lead: Number(f[0]),
-        time: nmcTime(f[1]),
+        lead,
+        time: arrivalStr,
         lat,
         lng,
         pressure: Number(f[4]),
