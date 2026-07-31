@@ -3301,7 +3301,8 @@
       const lead = p.lead != null ? ` <span style="color:#f0b45a;font-size:0.75rem">+${p.lead}h</span>` : "";
       return (
         `<div class="pt-pop">` +
-        `<div class="pt-pop-title">${badge}<b>${p.strong}</b>${power}${lead} · ${fmtTime24h(p.time)}</div>` +
+        `<div class="pt-pop-title">${badge}<b>${p.strong}</b>${power}</div>` +
+        `<div class="pt-pop-row">预计到达 <b>${fmtTime24h(p.time)}</b>${lead}</div>` +
         `<div class="pt-pop-row">中心 ${p.lat.toFixed(1)}°N ${p.lng.toFixed(1)}°E</div>` +
         `<div class="pt-pop-row">气压 <b>${dash(p.pressure)} hPa</b> · 最大风力 <b>${dash(p.speed)} m/s</b></div>` +
         wcTxt +
