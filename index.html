@@ -3273,6 +3273,42 @@
       );
     }
 
+    // 预测点 popup：与观测点格式一致，但标题加「预报」橙色徽标 + 超前小时
+    function forecastPopup(p) {
+      const est = estimateWindCircles(p);
+      let wcTxt = "";
+      if (est) {
+        const rows = [];
+        const addWc = (k, label, col) => {
+          if (!est[k]) return;
+          const q = est[k];
+          const quad = `${q[0]}/${q[1]}/${q[2]}/${q[3]}`;
+          rows.push(
+            `<div class="pt-pop-row wc-row">` +
+            `<span class="wc-dot" style="background:${col}"></span>` +
+            `<span class="wc-label">${label}（估算）</span>` +
+            `<span class="wc-val">${quad} km</span>` +
+            `<span class="wc-hint">（NE/SE/SW/NW·最大${maxRadius(q)}km）</span>` +
+            `</div>`
+          );
+        };
+        addWc("r7", "7级风圈", "rgba(127,212,200,1)");
+        addWc("r10", "10级风圈", "rgba(240,180,90,1)");
+        if (rows.length) wcTxt = `<div class="pt-pop-wc">${rows.join("")}</div>`;
+      }
+      const power = p.power != null && p.power !== "—" ? ` <span class="wc-power">${p.power}级</span>` : "";
+      const badge = `<span style="display:inline-block;background:#f0b45a;color:#1a1208;font-size:0.7rem;font-weight:700;padding:1px 5px;border-radius:4px;margin-right:4px;vertical-align:middle">预报</span>`;
+      const lead = p.lead != null ? ` <span style="color:#f0b45a;font-size:0.75rem">+${p.lead}h</span>` : "";
+      return (
+        `<div class="pt-pop">` +
+        `<div class="pt-pop-title">${badge}<b>${p.strong}</b>${power}${lead} · ${fmtTime24h(p.time)}</div>` +
+        `<div class="pt-pop-row">中心 ${p.lat.toFixed(1)}°N ${p.lng.toFixed(1)}°E</div>` +
+        `<div class="pt-pop-row">气压 <b>${dash(p.pressure)} hPa</b> · 最大风力 <b>${dash(p.speed)} m/s</b></div>` +
+        wcTxt +
+        `</div>`
+      );
+    }
+
     // 沿历史路径绘制可点击观测点（点击该点才显示其风圈）
     function drawObsPoints(points) {
       points.forEach((p, i) => {
@@ -3391,13 +3427,21 @@
           const ll = safePathLL(p.lat, p.lng);
           if (!ll) return;
           L.circleMarker(ll, {
-            radius: 3.5,
+            radius: 5,
             color: "#f0b45a",
             weight: 1,
             fillColor: "#1a1208",
             fillOpacity: 1,
-            interactive: false,
-          }).addTo(layers.forecast);
+            interactive: true,
+            className: "fc-pt",
+          })
+            .bindPopup(forecastPopup(p), { className: "pt-popup", maxWidth: 280 })
+            .on("click", () => {
+              _blockPanelToggle = true;
+              const est = estimateWindCircles(p);
+              if (est) showWindCircle({ ...p, windCircles: null, estimatedWindCircles: est }, ll);
+            })
+            .addTo(layers.forecast);
         });
       }
 
