@@ -878,6 +878,26 @@
       opacity: 1;
     }
 
+    /* 「✕」关闭按钮：面板右上角，最醒目的收回方式 */
+    .ty-ms-close {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      z-index: 5;
+      background: transparent;
+      border: none;
+      color: var(--text-dim, #7a8a93);
+      font-size: 1.1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .ty-ms-close:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: var(--text, #e6f0f5);
+    }
+
     /* ===== 手机端标签条 ===== */
     .ty-chips {
       display: flex;
@@ -2738,11 +2758,12 @@
               <span class="ty-ms-arrow">▾</span>
             </div>
             <div class="ty-ms-panel" id="tyMsPanel" hidden>
+              <button type="button" class="ty-ms-close" onclick="var s=document.getElementById('tyMultiSel');if(s){s.classList.remove('open');}var p=document.getElementById('tyMsPanel');if(p){p.hidden=true;}var t=document.getElementById('tyMsTrigger');if(t){t.setAttribute('aria-expanded','false');}" aria-label="关闭下拉">✕</button>
               <input class="ty-ms-filter" id="tyMsFilter" type="search" placeholder="筛选台风名…" autocomplete="off" />
               <div class="ty-ms-list" id="tyMsList" role="listbox"></div>
               <div class="ty-ms-footer">
                 <button type="button" id="tyMsClear">清除全部</button>
-                <span class="ty-ms-limit">最多 3 个 ·v7</span>
+                <span class="ty-ms-limit">最多 3 个 ·v8</span>
                 <button type="button" id="tyMsDone" class="ty-ms-done" onclick="var s=document.getElementById('tyMultiSel');if(s){s.classList.remove('open');}var p=document.getElementById('tyMsPanel');if(p){p.hidden=true;}var t=document.getElementById('tyMsTrigger');if(t){t.setAttribute('aria-expanded','false');}">完成</button>
               </div>
             </div>
