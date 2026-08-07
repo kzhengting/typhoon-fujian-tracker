@@ -776,6 +776,10 @@
       flex-direction: column;
       overflow: hidden;
     }
+    /* display:flex 会覆盖 [hidden]，需显式守卫：否则 panel.hidden=true 时面板仍可见 */
+    .ty-ms-panel[hidden] {
+      display: none;
+    }
 
     .ty-ms-filter {
       margin: 0.5rem;
@@ -2765,7 +2769,7 @@
               <div class="ty-ms-list" id="tyMsList" role="listbox"></div>
               <div class="ty-ms-footer">
                 <button type="button" id="tyMsClear">清除全部</button>
-                <span class="ty-ms-limit">最多 3 个 ·v10</span>
+                <span class="ty-ms-limit">最多 3 个 ·v11</span>
                 <button type="button" id="tyMsDone" class="ty-ms-done" onclick="var s=document.getElementById('tyMultiSel');if(s){s.classList.remove('open');}var p=document.getElementById('tyMsPanel');if(p){p.hidden=true;}var t=document.getElementById('tyMsTrigger');if(t){t.setAttribute('aria-expanded','false');}">完成</button>
               </div>
             </div>
