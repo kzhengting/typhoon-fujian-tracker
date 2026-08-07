@@ -132,6 +132,9 @@
 
     .ui>.hero .ty-row,
     .ui>.hero .ty-search,
+    .ui>.hero .ty-multisel,
+    .ui>.hero .ty-ms-trigger,
+    .ui>.hero .ty-ms-panel,
     .ui>footer .toolbar-actions {
       pointer-events: auto;
     }
@@ -665,6 +668,309 @@
       min-width: 5.2rem;
       color: var(--foam);
       border-color: rgba(127, 212, 200, 0.4);
+    }
+
+    .ty-select-hidden {
+      display: none !important;
+    }
+
+    /* ===== 多选台风下拉 ===== */
+    .ty-multisel {
+      position: relative;
+      flex: 1 1 280px;
+      min-width: 160px;
+    }
+
+    .ty-ms-trigger {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(8, 24, 34, 0.72);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.42rem 0.9rem;
+      cursor: pointer;
+      min-height: 2.1rem;
+      transition: border-color 0.2s;
+    }
+
+    .ty-ms-trigger:hover,
+    .ty-ms-trigger:focus {
+      border-color: rgba(127, 212, 200, 0.5);
+      outline: none;
+    }
+
+    .ty-ms-placeholder {
+      color: var(--ink-dim);
+      font-size: 0.82rem;
+      flex: 0 0 auto;
+    }
+
+    .ty-ms-placeholder.hide {
+      display: none;
+    }
+
+    .ty-ms-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    .ty-ms-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(127, 212, 200, 0.12);
+      border: 1px solid rgba(127, 212, 200, 0.3);
+      border-radius: 999px;
+      padding: 0.1rem 0.45rem;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .ty-ms-chip .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .ty-ms-chip .chip-x {
+      cursor: pointer;
+      opacity: 0.6;
+      font-size: 0.9rem;
+      line-height: 1;
+    }
+
+    .ty-ms-chip .chip-x:hover {
+      opacity: 1;
+    }
+
+    .ty-ms-arrow {
+      flex: 0 0 auto;
+      color: var(--ink-dim);
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+    }
+
+    .ty-multisel.open .ty-ms-arrow {
+      transform: rotate(180deg);
+    }
+
+    .ty-ms-panel {
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      right: 0;
+      z-index: 1400;
+      background: rgba(10, 26, 36, 0.98);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      max-height: 380px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ty-ms-filter {
+      margin: 0.5rem;
+      padding: 0.35rem 0.6rem;
+      background: rgba(8, 24, 34, 0.8);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      color: var(--ink);
+      font-size: 0.8rem;
+    }
+
+    .ty-ms-filter:focus {
+      outline: none;
+      border-color: rgba(127, 212, 200, 0.5);
+    }
+
+    .ty-ms-list {
+      flex: 1 1 auto;
+      overflow-y: auto;
+      padding: 0 0.25rem 0.25rem;
+    }
+
+    .ty-ms-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--ink);
+      transition: background 0.15s;
+    }
+
+    .ty-ms-item:hover {
+      background: rgba(127, 212, 200, 0.08);
+    }
+
+    .ty-ms-item input {
+      accent-color: #7fd4c8;
+      cursor: pointer;
+    }
+
+    .ty-ms-item.checked {
+      background: rgba(127, 212, 200, 0.12);
+    }
+
+    .ty-ms-item.checked .item-dot {
+      display: inline-block;
+    }
+
+    .ty-ms-item .item-dot {
+      display: none;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .ty-ms-item.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .ty-ms-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.35rem 0.6rem;
+      border-top: 1px solid var(--line);
+      font-size: 0.72rem;
+      color: var(--ink-dim);
+    }
+
+    .ty-ms-footer button {
+      background: none;
+      border: none;
+      color: var(--foam);
+      cursor: pointer;
+      font-size: 0.75rem;
+      text-decoration: underline;
+    }
+
+    .ty-ms-footer button:hover {
+      opacity: 0.8;
+    }
+
+    /* ===== 手机端标签条 ===== */
+    .ty-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+      margin-top: 0.35rem;
+    }
+
+    .ty-chips[hidden] {
+      display: none !important;
+    }
+
+    .ty-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(8, 24, 34, 0.8);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    .ty-chip .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .ty-chip .chip-x {
+      cursor: pointer;
+      opacity: 0.6;
+      font-size: 0.9rem;
+    }
+
+    .ty-chip .chip-x:hover {
+      opacity: 1;
+    }
+
+    /* ===== 对比表 ===== */
+    .ty-compare {
+      margin: 0.6rem 0;
+      padding: 0.8rem;
+      background: rgba(8, 24, 34, 0.5);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .ty-compare h3 {
+      font-size: 0.85rem;
+      color: var(--foam);
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.06em;
+    }
+
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .compare-table th {
+      text-align: left;
+      padding: 0.3rem 0.4rem;
+      color: var(--ink-dim);
+      font-weight: 500;
+      border-bottom: 1px solid var(--line);
+      white-space: nowrap;
+    }
+
+    .compare-table td {
+      padding: 0.35rem 0.4rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      vertical-align: top;
+    }
+
+    .compare-table td small {
+      color: var(--ink-dim);
+      font-size: 0.68rem;
+    }
+
+    .color-dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    /* ===== Toast ===== */
+    .ty-toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.9);
+      background: rgba(10, 26, 36, 0.95);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.6rem 1.2rem;
+      color: var(--ink);
+      font-size: 0.82rem;
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .ty-toast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
     }
 
     /* ===== 跨年份检索行 ===== */
@@ -1796,6 +2102,46 @@
         display: none;
       }
 
+      /* 多选下拉面板：手机端全宽弹出 */
+      .ty-ms-panel {
+        position: fixed;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        max-height: 60vh;
+        border-radius: 12px 12px 0 0;
+        z-index: 1500;
+      }
+
+      .ty-multisel.open .ty-ms-panel {
+        animation: msSlideUp 0.2s ease-out;
+      }
+
+      @keyframes msSlideUp {
+        from {
+          transform: translateY(100%);
+        }
+
+        to {
+          transform: translateY(0);
+        }
+      }
+
+      .ty-compare {
+        margin: 0.4rem 0;
+        padding: 0.5rem;
+      }
+
+      .compare-table {
+        font-size: 0.72rem;
+      }
+
+      .compare-table th,
+      .compare-table td {
+        padding: 0.25rem 0.3rem;
+      }
+
       /* footer 统计/工具栏 + scroll-cue 收进抽屉，让 1fr map-gap 占满视口 */
       .ui>footer,
       .ui>.scroll-cue {
@@ -2366,7 +2712,23 @@
         <div class="ty-row">
           <span class="ty-label">监测台风</span>
           <select id="yearSel" class="ty-select year-select" aria-label="选择年份"></select>
-          <select id="tySelect" class="ty-select" aria-label="选择台风"></select>
+          <div class="ty-multisel" id="tyMultiSel">
+            <div class="ty-ms-trigger" id="tyMsTrigger" tabindex="0" role="combobox" aria-haspopup="listbox"
+              aria-expanded="false">
+              <span class="ty-ms-placeholder">选择台风…</span>
+              <span class="ty-ms-chips" id="tyMsChips"></span>
+              <span class="ty-ms-arrow">▾</span>
+            </div>
+            <div class="ty-ms-panel" id="tyMsPanel" hidden>
+              <input class="ty-ms-filter" id="tyMsFilter" type="search" placeholder="筛选台风名…" autocomplete="off" />
+              <div class="ty-ms-list" id="tyMsList" role="listbox"></div>
+              <div class="ty-ms-footer">
+                <button type="button" id="tyMsClear">清除全部</button>
+                <span class="ty-ms-limit">最多 3 个</span>
+              </div>
+            </div>
+          </div>
+          <select id="tySelect" class="ty-select ty-select-hidden" aria-label="选择台风" hidden></select>
         </div>
         <div class="ty-search">
           <div class="ty-search-box">
@@ -2386,6 +2748,7 @@
               title="全程路径最近距福建 < 50km，按路径推导">登陆福建</button>
           </div>
           <div class="ty-search-hint" id="tySearchHint" hidden></div>
+          <div class="ty-chips" id="tyChips" hidden></div>
         </div>
         <div class="ty-ident" id="tyIdent" hidden></div>
         <div class="hero-label" id="heroLabel">中心距福州</div>
@@ -2590,6 +2953,18 @@
     let currentTyName = "台风";
     let selectedYear = null;
 
+    // ---- 多台风叠加：最多 3 个，各自独立颜色与图层 ----
+    const MAX_OVERLAY = 3;
+    const OVERLAY_COLORS = ["#7fd4c8", "#f5a623", "#e84a5f"]; // 青、橙、红
+    // selectedTyphoons: Array<{ id, color, colorIdx, info, layerGroup }>
+    let selectedTyphoons = [];
+    const isMultiSelect = () => selectedTyphoons.length >= 2;
+    function nextColorIdx() {
+      const used = selectedTyphoons.map((t) => t.colorIdx);
+      for (let i = 0; i < MAX_OVERLAY; i++) if (!used.includes(i)) return i;
+      return 0;
+    }
+
     const REFRESH_MS = 5 * 60 * 1000;
     const CURRENT_YEAR = new Date().getFullYear();
     const LIST_URL = "https://typhoon.nmc.cn/weatherservice/typhoon/jsons/list_default";
@@ -2645,6 +3020,15 @@
       tySearch: document.getElementById("tySearch"),
       tySearchClear: document.getElementById("tySearchClear"),
       tySearchHint: document.getElementById("tySearchHint"),
+      tyMultiSel: document.getElementById("tyMultiSel"),
+      tyMsTrigger: document.getElementById("tyMsTrigger"),
+      tyMsPanel: document.getElementById("tyMsPanel"),
+      tyMsList: document.getElementById("tyMsList"),
+      tyMsFilter: document.getElementById("tyMsFilter"),
+      tyMsClear: document.getElementById("tyMsClear"),
+      tyMsChips: document.getElementById("tyMsChips"),
+      tyMsPlaceholder: document.querySelector(".ty-ms-placeholder"),
+      tyChips: document.getElementById("tyChips"),
       scopeFujian: document.getElementById("scopeFujian"),
       scopeLand: document.getElementById("scopeLand"),
       zoomInBtn: document.getElementById("zoomInBtn"),
@@ -3188,7 +3572,8 @@
     }
 
     // 绘制 7/10/12 级风圈（由外到内叠放）
-    function drawWindCircles(center, point) {
+    function drawWindCircles(center, point, tyLayers) {
+      tyLayers = tyLayers || layers;
       const wc = point.windCircles || point.estimatedWindCircles;
       if (!wc) return;
       // 仅估算（无观测）时用虚线 + 降低填充透明度，与观测实线明确区分
@@ -3212,13 +3597,14 @@
           interactive: false,
           className: "wind-ring" + (isEstimated ? " wind-ring-est" : ""),
         })
-          .addTo(layers.wind);
+          .addTo(tyLayers.wind);
       });
     }
 
     // 点击某点才显示其风圈：清空其它已显示风圈后，仅绘制该点风圈（center 缺省取该点自身坐标）
-    function showWindCircle(point, center) {
-      layers.wind.clearLayers();
+    function showWindCircle(point, center, tyLayers) {
+      tyLayers = tyLayers || layers;
+      tyLayers.wind.clearLayers();
       if (!point || (!point.windCircles && !point.estimatedWindCircles)) return;
       // 手机端：点击路径点看风圈时收起信息面板，露出全图查看风圈
       if (window.matchMedia("(max-width: 768px), (pointer: coarse)").matches && typeof sheetExpanded !== "undefined" && sheetExpanded) {
@@ -3228,7 +3614,7 @@
         ? center
         : safePathLL(point.lat, point.lng);
       if (!c) return;
-      drawWindCircles(c, point);
+      drawWindCircles(c, point, tyLayers);
     }
 
     // 观测点等级配色
@@ -3321,7 +3707,7 @@
     }
 
     // 沿历史路径绘制可点击观测点（点击该点才显示其风圈）
-    function drawObsPoints(points) {
+    function drawObsPoints(points, tyLayers, color) {
       points.forEach((p, i) => {
         if (i === points.length - 1) return; // 末点由台风主图标表示
         const ll = safePathLL(p.lat, p.lng);
@@ -3336,20 +3722,25 @@
           className: "obs-pt",
         })
           .bindPopup(pointPopup(p), { className: "pt-popup", maxWidth: 280 })
-          .on("click", () => { _blockPanelToggle = true; showWindCircle(p, ll); })
-          .addTo(layers.obs);
+          .on("click", () => { _blockPanelToggle = true; showWindCircle(p, ll, tyLayers); })
+          .addTo(tyLayers.obs);
       });
     }
 
+    // 单选入口：清全图后用全局 layers 渲染（向后兼容）
     function renderMap(points, latest, forecastPts) {
       state._renderArgs = { points, latest, forecastPts };
       clearDynamicLayers();
+      renderMapForTyphoon(points, latest, forecastPts, "#7fd4c8", layers, true);
+    }
 
-      // 动态城市标记
-      const cityLL = safeCityLL(selectedCity.lat, selectedCity.lng);
+    // 多选叠加核心：所有图层写入 tyLayers，颜色参数化
+    function renderMapForTyphoon(points, latest, forecastPts, color, tyLayers, isPrimary) {
+      // 动态城市标记（仅主台风渲染，避免重复）
+      const cityLL = isPrimary ? safeCityLL(selectedCity.lat, selectedCity.lng) : null;
       if (cityLL) {
         L.marker(cityLL, { icon: shIcon, interactive: false, _dynamic: true })
-          .addTo(layers.markers);
+          .addTo(tyLayers.markers);
         L.marker(cityLL, {
           icon: L.divIcon({
             className: "ty-icon",
@@ -3359,23 +3750,23 @@
           }),
           interactive: false,
           _dynamic: true,
-        }).addTo(layers.markers);
+        }).addTo(tyLayers.markers);
       }
 
       const latlngs = points.map((p) => safePathLL(p.lat, p.lng)).filter(Boolean);
       if (latlngs.length > 1) {
         // 可见的细路径线（不拦截点击）
         L.polyline(latlngs, {
-          color: "#7fd4c8",
+          color: color,
           weight: 2.5,
           opacity: 0.85,
           lineCap: "round",
           lineJoin: "round",
           interactive: false,
-        }).addTo(layers.track);
+        }).addTo(tyLayers.track);
         // 透明的加宽命中线：点击路径任意位置吸附到最近观测点，显示风圈 + 详情
         L.polyline(latlngs, {
-          color: "#7fd4c8",
+          color: color,
           weight: 18,
           opacity: 0,
           interactive: true,
@@ -3399,47 +3790,47 @@
             if (!best) return;
             const c = safePathLL(best.lat, best.lng);
             if (!c) return;
-            showWindCircle(best, c);
+            showWindCircle(best, c, tyLayers);
             L.popup({ className: "pt-popup", maxWidth: 280, autoPan: true, autoPanPadding: [40, 40], keepInView: true })
               .setLatLng(c)
               .setContent(pointPopup(best))
               .openOn(map);
           })
-          .addTo(layers.track);
+          .addTo(tyLayers.track);
       }
 
-      drawObsPoints(points);
+      drawObsPoints(points, tyLayers, color);
       const latestC = safePathLL(latest.lat, latest.lng);
-      if (latestC) drawWindCircles(latestC, latest); // 当前位置风圈置于最上层，便于点击
+      if (latestC) drawWindCircles(latestC, latest, tyLayers); // 当前位置风圈置于最上层，便于点击
 
-      // 台风 — 城市连线
+      // 台风 — 城市连线（仅主台风）
       const latestLL = safePathLL(latest.lat, latest.lng);
-      if (latestLL && cityLL) {
+      if (isPrimary && latestLL && cityLL) {
         L.polyline([latestLL, cityLL], {
           color: "rgba(232,241,244,0.35)",
           weight: 1.2,
           dashArray: "4 8",
           interactive: false,
-        }).addTo(layers.link);
+        }).addTo(tyLayers.link);
       }
 
       if (forecastPts.length > 1) {
         const fcLatLngs = forecastPts.map((p) => safePathLL(p.lat, p.lng)).filter(Boolean);
         if (fcLatLngs.length > 1) {
           L.polyline(fcLatLngs, {
-            color: "#f0b45a",
+            color: color,
             weight: 2,
             opacity: 0.9,
             dashArray: "7 8",
             lineCap: "round",
-          }).addTo(layers.forecast);
+          }).addTo(tyLayers.forecast);
         }
         forecastPts.slice(1).forEach((p) => {
           const ll = safePathLL(p.lat, p.lng);
           if (!ll) return;
           L.circleMarker(ll, {
             radius: 5,
-            color: "#f0b45a",
+            color: color,
             weight: 1,
             fillColor: "#1a1208",
             fillOpacity: 1,
@@ -3450,9 +3841,9 @@
             .on("click", () => {
               _blockPanelToggle = true;
               const est = estimateWindCircles(p);
-              if (est) showWindCircle({ ...p, windCircles: null, estimatedWindCircles: est }, ll);
+              if (est) showWindCircle({ ...p, windCircles: null, estimatedWindCircles: est }, ll, tyLayers);
             })
-            .addTo(layers.forecast);
+            .addTo(tyLayers.forecast);
         });
       }
 
@@ -3462,57 +3853,328 @@
           icon: tyIcon,
           interactive: true,
           _dynamic: true,
-        }).bindPopup(pointPopup(latest), { className: "pt-popup", maxWidth: 280 }).addTo(layers.markers);
+        }).bindPopup(pointPopup(latest), { className: "pt-popup", maxWidth: 280 }).addTo(tyLayers.markers);
         // 当前定位点常无风圈半径字段，退而取最近一个有风圈数据的路径点，并以当前台风位置为圆心展示
         tyMarker.on("click", () => {
           const target = [...points].reverse().find((p) => p.windCircles || p.estimatedWindCircles) || latest;
-          showWindCircle(target, latestLL);
+          showWindCircle(target, latestLL, tyLayers);
         });
 
+        const labelName = isMultiSelect() ? currentTyName : currentTyName;
         tyLabel = L.marker(latestLL, {
           icon: L.divIcon({
             className: "ty-icon",
-            html: `<div class="map-label">${currentTyName} · ${latest.strong}</div>`,
+            html: `<div class="map-label" style="border-left:3px solid ${color}">${labelName} · ${latest.strong}</div>`,
             iconSize: [120, 22],
             iconAnchor: [-12, 12],
           }),
           interactive: false,
           _dynamic: true,
-        }).addTo(layers.markers);
+        }).addTo(tyLayers.markers);
       }
 
-      const fjAnchor = [
-        safeCityLL(28.4, 115.8),
-        safeCityLL(23.3, 120.8),
-      ].filter(Boolean);
-      const fcLatLngsForBounds = forecastPts.map((p) => safePathLL(p.lat, p.lng)).filter(Boolean);
-      const all = [...latlngs, ...fcLatLngsForBounds, ...fjAnchor];
-      if (cityLL) all.push(cityLL);
-      if (all.length >= 2) {
-        lastBounds = L.latLngBounds(all).pad(0.16);
-        if (state.fitMap) {
-          // 手机端首次加载：地图常驻可交互，fitBounds 基于当前尺寸（抽屉覆盖在上方）
-          const isMob = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
-          // Map-first 布局：顶部预留紧凑选择条（header+city-tabs+ty-row+ty-search 约 230px），
-          // 底部预留 mobileChip 数据条 + 安全区（约 150px），路径落在可见带内
-          const fitOpts = isMob
-            ? { paddingTopLeft: [20, 230], paddingBottomRight: [20, 150], animate: true, duration: 0.8 }
-            : { animate: true, duration: 0.8 };
-          map.fitBounds(lastBounds, fitOpts);
-          state.fitMap = false;
+      // fitBounds 仅主台风执行（多选时由 fitMapToAll 统一处理）
+      if (isPrimary) {
+        const fjAnchor = [
+          safeCityLL(28.4, 115.8),
+          safeCityLL(23.3, 120.8),
+        ].filter(Boolean);
+        const fcLatLngsForBounds = forecastPts.map((p) => safePathLL(p.lat, p.lng)).filter(Boolean);
+        const all = [...latlngs, ...fcLatLngsForBounds, ...fjAnchor];
+        if (cityLL) all.push(cityLL);
+        if (all.length >= 2) {
+          lastBounds = L.latLngBounds(all).pad(0.16);
+          if (state.fitMap) {
+            const isMob = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
+            const fitOpts = isMob
+              ? { paddingTopLeft: [20, 230], paddingBottomRight: [20, 150], animate: true, duration: 0.8 }
+              : { animate: true, duration: 0.8 };
+            map.fitBounds(lastBounds, fitOpts);
+            state.fitMap = false;
+          }
         }
       }
 
-      // 尊重当前图层开关
-      if (!windOn && map.hasLayer(layers.wind)) map.removeLayer(layers.wind);
-      if (windOn && !map.hasLayer(layers.wind)) map.addLayer(layers.wind);
-      if (!obsOn && map.hasLayer(layers.obs)) map.removeLayer(layers.obs);
-      if (obsOn && !map.hasLayer(layers.obs)) map.addLayer(layers.obs);
+      // 尊重当前图层开关（仅全局 layers 有开关控制）
+      if (tyLayers === layers) {
+        if (!windOn && map.hasLayer(layers.wind)) map.removeLayer(layers.wind);
+        if (windOn && !map.hasLayer(layers.wind)) map.addLayer(layers.wind);
+        if (!obsOn && map.hasLayer(layers.obs)) map.removeLayer(layers.obs);
+        if (obsOn && !map.hasLayer(layers.obs)) map.addLayer(layers.obs);
+      }
     }
 
     function pickChinaForecast(latest) {
       const fc = latest.forecast || [];
       return fc.filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng));
+    }
+
+    // ---- 多台风叠加：增删 + 地图适配 + 面板分发 ----
+
+    function createTyphoonLayers() {
+      const g = {
+        track: L.layerGroup().addTo(map),
+        wind: L.layerGroup().addTo(map),
+        obs: L.layerGroup().addTo(map),
+        forecast: L.layerGroup().addTo(map),
+        markers: L.layerGroup().addTo(map),
+        link: L.layerGroup().addTo(map),
+      };
+      return g;
+    }
+
+    function removeTyphoonLayers(t) {
+      if (!t || !t.layerGroup) return;
+      ["track", "wind", "obs", "forecast", "markers", "link"].forEach((k) => {
+        if (t.layerGroup[k]) { t.layerGroup[k].clearLayers(); map.removeLayer(t.layerGroup[k]); }
+      });
+    }
+
+    // 多选：把当前 windOn/obsOn 开关态同步到所有台风的独立 layerGroup
+    // （全局 layers 由 windBtn/obsBtn 直接处理，此处跳过；只应用当前态，不切换开关）
+    function syncLayerTogglesToAll() {
+      selectedTyphoons.forEach((t) => {
+        if (!t.layerGroup || t.layerGroup === layers) return;
+        if (windOn && !map.hasLayer(t.layerGroup.wind)) map.addLayer(t.layerGroup.wind);
+        if (!windOn && map.hasLayer(t.layerGroup.wind)) map.removeLayer(t.layerGroup.wind);
+        if (obsOn && !map.hasLayer(t.layerGroup.obs)) map.addLayer(t.layerGroup.obs);
+        if (!obsOn && map.hasLayer(t.layerGroup.obs)) map.removeLayer(t.layerGroup.obs);
+      });
+    }
+
+    function clearAllTyphoonLayers() {
+      // 仅移除非全局的台风图层组（全局 layers 由 clearDynamicLayers 管理）
+      selectedTyphoons.forEach((t) => {
+        if (t.layerGroup !== layers) removeTyphoonLayers(t);
+      });
+      selectedTyphoons = [];
+      selectedTyphoonId = null;
+    }
+
+    async function addTyphoon(id) {
+      if (selectedTyphoons.find((t) => t.id === id)) return;
+      if (selectedTyphoons.length >= MAX_OVERLAY) {
+        showToast("最多叠加 " + MAX_OVERLAY + " 个台风，请先移除其他台风");
+        return;
+      }
+      const colorIdx = nextColorIdx();
+      const color = OVERLAY_COLORS[colorIdx];
+      let info;
+      try {
+        info = await fetchTyphoonInfo(id);
+      } catch (e) {
+        showToast("获取台风数据失败");
+        return;
+      }
+      if (!info || !info.points || !info.points.length) {
+        showToast("该台风暂无路径数据");
+        return;
+      }
+      // 从单选切换到多选：清空全局 layers 上的旧渲染
+      if (selectedTyphoons.length === 0) {
+        clearDynamicLayers();
+      }
+      const layerGroup = createTyphoonLayers();
+      selectedTyphoons.push({ id, color, colorIdx, info, layerGroup });
+      selectedTyphoonId = selectedTyphoons[0].id;
+      state.info = info;
+      currentTyName = info.name || "未命名";
+
+      const latest = info.points[info.points.length - 1];
+      const forecastPts = pickChinaForecast(latest);
+      const isPrimary = selectedTyphoons.length === 1;
+      renderMapForTyphoon(info.points, latest, forecastPts, color, layerGroup, isPrimary);
+
+      if (state.fitMap) { fitMapToAll(); state.fitMap = false; }
+      syncLayerTogglesToAll();
+      updateMultiUI();
+      renderPanel();
+    }
+
+    function removeTyphoon(id) {
+      const idx = selectedTyphoons.findIndex((t) => t.id === id);
+      if (idx < 0) return;
+      removeTyphoonLayers(selectedTyphoons[idx]);
+      selectedTyphoons.splice(idx, 1);
+      selectedTyphoonId = selectedTyphoons[0]?.id || null;
+      if (selectedTyphoons.length > 0) {
+        state.info = selectedTyphoons[0].info;
+        currentTyName = selectedTyphoons[0].info.name || "未命名";
+      } else {
+        state.info = null;
+        currentTyName = "台风";
+      }
+      updateMultiUI();
+      renderPanel();
+    }
+
+    // 多选刷新：原地重拉每个台风数据并重渲染，保留颜色与图层组，不清空叠加
+    async function refreshAllSelected() {
+      const mySeq = ++loadSeq;
+      setLive("warn", "刷新中…");
+      el.refreshBtn.disabled = true;
+      const savedFit = state.fitMap;
+      state.fitMap = false; // 防止 renderMapForTyphoon 内 isPrimary 分支误触发单台风 fit
+      try {
+        for (const t of selectedTyphoons) {
+          try {
+            const info = await fetchTyphoonInfo(t.id);
+            if (mySeq !== loadSeq) return; // 新的 load()/refresh 已发起，丢弃陈旧结果
+            if (!info || !info.points || !info.points.length) continue;
+            ["track", "wind", "obs", "forecast", "markers", "link"].forEach((k) => {
+              if (t.layerGroup[k]) t.layerGroup[k].clearLayers();
+            });
+            t.info = info;
+            const latest = info.points[info.points.length - 1];
+            const forecastPts = pickChinaForecast(latest);
+            const isPrimary = (t === selectedTyphoons[0]);
+            renderMapForTyphoon(info.points, latest, forecastPts, t.color, t.layerGroup, isPrimary);
+          } catch (e) {
+            console.warn("刷新台风失败:", t.id, e);
+          }
+        }
+        if (mySeq !== loadSeq) return;
+        state.info = selectedTyphoons[0].info;
+        currentTyName = selectedTyphoons[0].info.name || "未命名";
+        syncLayerTogglesToAll();
+        updateMultiUI();
+        renderPanel();
+        setLive("ok", "已更新");
+      } finally {
+        if (mySeq === loadSeq) {
+          state.fitMap = savedFit;
+          el.refreshBtn.disabled = false;
+        }
+      }
+    }
+
+    function fitMapToAll() {
+      const allLatLngs = [];
+      selectedTyphoons.forEach((t) => {
+        (t.info.points || []).forEach((p) => {
+          const ll = safePathLL(p.lat, p.lng);
+          if (ll) allLatLngs.push(ll);
+        });
+      });
+      if (allLatLngs.length < 2) return;
+      const isMob = window.matchMedia("(max-width: 768px), (pointer: coarse)").matches;
+      const fitOpts = isMob
+        ? { paddingTopLeft: [20, 230], paddingBottomRight: [20, 150], animate: true, duration: 0.8 }
+        : { animate: true, duration: 0.8 };
+      map.fitBounds(L.latLngBounds(allLatLngs).pad(0.16), fitOpts);
+    }
+
+    // 信息面板分发：0 台风→提示，1 台风→原有详情，2+ 台风→对比表
+    function renderPanel() {
+      const multi = isMultiSelect();
+      // 显示/隐藏地市影响相关元素
+      const hideCity = multi;
+      const cityTabs = document.getElementById("cityTabs");
+      if (cityTabs) cityTabs.hidden = hideCity;
+      const heroSection = document.querySelector(".hero");
+      if (heroSection) {
+        const cityEls = heroSection.querySelectorAll(".distance, .hero-label, #heroLine, #situationBox, #nextStrip, #metaRow");
+        cityEls.forEach((el) => el.hidden = hideCity);
+        // ty-ident 始终显示
+        const tyIdent = heroSection.querySelector(".ty-ident");
+        if (tyIdent) tyIdent.hidden = selectedTyphoons.length === 0;
+      }
+      const footer = document.querySelector("footer");
+      if (footer) {
+        const lifeStats = footer.querySelector(".life-stats");
+        const lifeEvents = footer.querySelector("#lifeEvents");
+        const hourly = footer.querySelector("#hourlyStrip");
+        if (lifeStats) lifeStats.hidden = hideCity;
+        if (lifeEvents) lifeEvents.hidden = hideCity;
+        if (hourly) hourly.hidden = hideCity;
+      }
+
+      if (selectedTyphoons.length === 0) {
+        if (el.tyIdent) { el.tyIdent.hidden = true; }
+        showEmptyHint();
+      } else if (!multi) {
+        // 单选：走原有 renderData 逻辑
+        // renderData 已在 renderTyphoon 中调用，这里仅确保 DOM 可见
+      } else {
+        // 多选：渲染对比表
+        renderComparisonTable();
+      }
+      // 手机端刷新面板
+      if (window.matchMedia("(max-width: 768px), (pointer: coarse)").matches && typeof refreshSheetBody === "function") {
+        refreshSheetBody();
+      }
+    }
+
+    function showEmptyHint() {
+      if (el.heroLabel) el.heroLabel.hidden = true;
+      const existing = document.querySelector(".ty-compare");
+      if (existing) existing.remove();
+    }
+
+    function renderComparisonTable() {
+      // 移除旧对比表
+      const old = document.querySelector(".ty-compare");
+      if (old) old.remove();
+
+      // 在 hero 区域插入对比表
+      const heroSection = document.querySelector(".hero");
+      if (!heroSection) return;
+
+      const rows = selectedTyphoons.map((t) => {
+        const info = t.info;
+        const points = info.points || [];
+        const latest = points[points.length - 1];
+        const landfall = detectLandfall(points);
+        // 峰值强度：speed 最大点
+        let peak = points[0] || latest;
+        for (const p of points) { if ((p.speed || 0) > (peak.speed || 0)) peak = p; }
+
+        const noInfo = parseTyphoonNo(info.code, info.year || selectedYear);
+        const nameTxt = info.name || "未命名";
+        const numTxt = noInfo ? `${noInfo.year}年第${noInfo.no}号` : (info.tfid || "—");
+        const landPlace = landfall.landed ? nearestCoastalName(landfall.lat, landfall.lng) : "未登陆";
+        const landWind = landfall.landed && landfall.point ? `${dash(landfall.point.speed)} m/s` : "—";
+        const landLevel = landfall.landed && landfall.point ? `${dash(landfall.point.strong)} ${dash(landfall.point.power)}级` : "—";
+        const peakLevel = `${dash(peak.strong)} ${dash(peak.power)}级`;
+
+        return `<tr>
+          <td><span class="color-dot" style="background:${t.color}"></span></td>
+          <td><b>${nameTxt}</b><br><small>${numTxt}</small></td>
+          <td>${landPlace}</td>
+          <td>${landWind}</td>
+          <td>${landLevel}</td>
+          <td>${peakLevel}</td>
+        </tr>`;
+      }).join("");
+
+      const div = document.createElement("div");
+      div.className = "ty-compare";
+      div.innerHTML = `
+        <h3>台风对比研判（${selectedTyphoons.length} 个）</h3>
+        <table class="compare-table">
+          <thead>
+            <tr><th></th><th>台风</th><th>登陆点</th><th>登陆风力</th><th>登陆级别</th><th>峰值强度</th></tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+      heroSection.appendChild(div);
+    }
+
+    // 轻量 toast 提示
+    let toastTimer = null;
+    function showToast(msg) {
+      let toast = document.getElementById("tyToast");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "tyToast";
+        toast.className = "ty-toast";
+        document.body.appendChild(toast);
+      }
+      toast.textContent = msg;
+      toast.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toast.classList.remove("show"), 2500);
     }
 
     function findClosestPoint(forecastPts, currentDistance, latest) {
@@ -4664,8 +5326,15 @@
       // 新的 load() 已发起：丢弃本次陈旧结果，避免覆盖较新的渲染
       if (mySeq !== loadSeq) return;
       state.info = info;
+      currentTyName = info.name || "未命名";
+      // 同步多选状态：单选模式下 selectedTyphoons 仅含当前台风，使用全局 layers
+      clearAllTyphoonLayers();
+      selectedTyphoons = [{ id, color: OVERLAY_COLORS[0], colorIdx: 0, info, layerGroup: layers }];
+      selectedTyphoonId = id;
       updateCityLabels();
       renderData(info, weather);
+      updateMultiUI();
+      renderPanel();
       // 手机端：选台风后自动滚动到地图区域（map-gap），让地图成为首屏主视图
       if (window.matchMedia("(max-width: 768px), (pointer: coarse)").matches) {
         setTimeout(() => {
@@ -4694,6 +5363,7 @@
           if (mySeq !== loadSeq) return; // 新的 load() 已发起，丢弃陈旧后续动作
           setLive("ok", "已更新");
           buildCityTabs();
+          if (mySeq === loadSeq) buildMultiSelectList(state.index ? filterIndex(state.filter.query, state.filter.scope) : []);
           return;
         }
 
@@ -4706,6 +5376,7 @@
           selectedTyphoonId = null;
           setLive("warn", selectedYear + " 年无数据");
           showError(`${selectedYear} 年中央气象台暂无台风档案数据，可换其它年份查看。`);
+          buildMultiSelectList([]);
         } else {
           clearError();
           if (!selectedTyphoonId || !list.find((t) => t.id === selectedTyphoonId)) {
@@ -4713,6 +5384,7 @@
             selectedTyphoonId = (active || list[0]).id;
           }
           buildTyphoonSelect(list);
+          buildMultiSelectList(list);
           await renderTyphoon(selectedTyphoonId);
           if (mySeq !== loadSeq) return; // 新的 load() 已发起，跳过陈旧的 UI 收尾
         }
@@ -4806,6 +5478,7 @@
       const meta = state.indexMeta || { startYear: 1949, endYear: CURRENT_YEAR };
       if (!res.length) {
         buildTyphoonSelectFromIndex(res);
+        buildMultiSelectList(res);
         selectedTyphoonId = null;
         el.tySearchHint.hidden = false;
         el.tySearchHint.classList.add("empty");
@@ -4820,6 +5493,7 @@
         selectedYear = res[0].year;
       }
       buildTyphoonSelectFromIndex(res);
+      buildMultiSelectList(res);
       const scopeTxt =
         scope === "land"
           ? " · 登陆/逼近福建（按路径推导）"
@@ -4834,15 +5508,19 @@
 
     function schedule() {
       if (refreshTimer) clearInterval(refreshTimer);
-      refreshTimer = setInterval(load, REFRESH_MS);
+      refreshTimer = setInterval(() => {
+        if (isMultiSelect()) refreshAllSelected(); else load();
+      }, REFRESH_MS);
     }
 
     el.refreshBtn.addEventListener("click", () => {
+      if (isMultiSelect()) { refreshAllSelected(); schedule(); return; }
       load();
       schedule();
     });
 
     el.fitBtn.addEventListener("click", () => {
+      if (isMultiSelect()) { fitMapToAll(); return; }
       if (lastBounds) map.fitBounds(lastBounds, { animate: true });
     });
 
@@ -4859,6 +5537,7 @@
       else map.removeLayer(layers.wind);
       // Task 2：同步浮动数据条风圈按钮态
       if (el.mcWind) el.mcWind.classList.toggle("on", windOn);
+      syncLayerTogglesToAll();
     });
 
     el.obsBtn.addEventListener("click", () => {
@@ -4866,6 +5545,7 @@
       el.obsBtn.classList.toggle("on", obsOn);
       if (obsOn) map.addLayer(layers.obs);
       else map.removeLayer(layers.obs);
+      syncLayerTogglesToAll();
     });
 
     el.tySelect.addEventListener("change", () => {
@@ -4882,6 +5562,8 @@
 
     el.yearSel.addEventListener("change", () => {
       selectedYear = Number(el.yearSel.value);
+      clearAllTyphoonLayers();
+      clearDynamicLayers();
       selectedTyphoonId = null;
       clearSearchState();
       state.fitMap = true;
@@ -4943,6 +5625,141 @@
       });
     });
 
+    // ---- 多选台风下拉 ----
+
+    // 当前列表数据（年份列表或搜索结果），供 buildMultiSelectList 使用
+    let _multiList = [];
+
+    function buildMultiSelectList(list) {
+      _multiList = list || [];
+      if (!el.tyMsList) return;
+      const selectedIds = selectedTyphoons.map((t) => t.id);
+      const capped = _multiList.slice(0, 600);
+      el.tyMsList.innerHTML = capped.length
+        ? capped.map((t) => {
+          const en = t.enName && t.enName !== "nameless" ? " " + t.enName : "";
+          const numTxt = t.no ? `${t.year}年第${t.no}号 ` : `${t.year} `;
+          const nm = t.name || "未命名";
+          const tag = t.isActive ? "（活动）" : "";
+          const noPath = ("fjMin" in t && t.fjMin == null) ? "（无路径）" : "";
+          const isSel = selectedIds.includes(t.id);
+          const isMax = !isSel && selectedTyphoons.length >= MAX_OVERLAY;
+          const dotColor = isSel ? OVERLAY_COLORS[selectedTyphoons.find((x) => x.id === t.id).colorIdx] : "";
+          return `<label class="ty-ms-item${isSel ? " checked" : ""}${isMax ? " disabled" : ""}" data-id="${t.id}">
+              <input type="checkbox" value="${t.id}" ${isSel ? "checked" : ""} ${isMax ? "disabled" : ""} />
+              <span class="item-dot" style="background:${dotColor}"></span>
+              <span>${numTxt}${nm}${en}${noPath}${tag}</span>
+            </label>`;
+        }).join("")
+        : `<div class="ty-ms-empty" style="padding:0.6rem;color:var(--ink-dim);font-size:0.8rem">无台风数据</div>`;
+    }
+
+    function updateMultiUI() {
+      // PC trigger chips
+      if (el.tyMsChips) {
+        el.tyMsChips.innerHTML = selectedTyphoons.map((t) => {
+          const nm = t.info.name || "未命名";
+          return `<span class="ty-ms-chip" data-id="${t.id}">
+            <span class="chip-dot" style="background:${t.color}"></span>
+            <span>${nm}</span>
+            <span class="chip-x" data-id="${t.id}">×</span>
+          </span>`;
+        }).join("");
+        if (el.tyMsPlaceholder) el.tyMsPlaceholder.classList.toggle("hide", selectedTyphoons.length > 0);
+      }
+      // Mobile chips bar
+      if (el.tyChips) {
+        el.tyChips.hidden = selectedTyphoons.length === 0;
+        el.tyChips.innerHTML = selectedTyphoons.map((t) => {
+          const nm = t.info.name || "未命名";
+          return `<span class="ty-chip" data-id="${t.id}">
+            <span class="chip-dot" style="background:${t.color}"></span>
+            <span>${nm}</span>
+            <span class="chip-x" data-id="${t.id}">×</span>
+          </span>`;
+        }).join("");
+      }
+      // 更新下拉列表中的 checkbox 状态
+      if (el.tyMsList && _multiList.length) {
+        buildMultiSelectList(_multiList);
+      }
+      // 手机端浮动数据条
+      if (typeof updateMobileChip === "function") updateMobileChip();
+    }
+
+    // 下拉开关
+    if (el.tyMsTrigger) {
+      el.tyMsTrigger.addEventListener("click", (e) => {
+        if (e.target.classList.contains("chip-x")) return; // 点 × 不开面板
+        const isOpen = el.tyMultiSel.classList.toggle("open");
+        el.tyMsPanel.hidden = !isOpen;
+        el.tyMsTrigger.setAttribute("aria-expanded", String(isOpen));
+        if (isOpen && el.tyMsFilter) el.tyMsFilter.focus();
+      });
+    }
+    // 点外部收起
+    document.addEventListener("click", (e) => {
+      if (!el.tyMultiSel || !el.tyMultiSel.classList.contains("open")) return;
+      if (el.tyMultiSel.contains(e.target)) return;
+      el.tyMultiSel.classList.remove("open");
+      el.tyMsPanel.hidden = true;
+      el.tyMsTrigger.setAttribute("aria-expanded", "false");
+    });
+    // 筛选输入
+    if (el.tyMsFilter) {
+      el.tyMsFilter.addEventListener("input", () => {
+        const q = el.tyMsFilter.value.trim().toLowerCase();
+        el.tyMsList.querySelectorAll(".ty-ms-item").forEach((item) => {
+          const txt = item.textContent.toLowerCase();
+          item.style.display = !q || txt.includes(q) ? "" : "none";
+        });
+      });
+    }
+    // 列表项点击：切换选中
+    if (el.tyMsList) {
+      el.tyMsList.addEventListener("click", (e) => {
+        const item = e.target.closest(".ty-ms-item");
+        if (!item || item.classList.contains("disabled")) return;
+        const id = item.dataset.id;
+        const cb = item.querySelector("input[type=checkbox]");
+        if (!cb) return;
+        if (cb.checked) {
+          // 已选中 → 取消
+          removeTyphoon(id);
+        } else {
+          // 未选中 → 加入
+          state.fitMap = selectedTyphoons.length === 0;
+          addTyphoon(id);
+        }
+      });
+    }
+    // trigger chips × 点击
+    if (el.tyMsChips) {
+      el.tyMsChips.addEventListener("click", (e) => {
+        if (e.target.classList.contains("chip-x")) {
+          e.stopPropagation();
+          removeTyphoon(e.target.dataset.id);
+        }
+      });
+    }
+    // 手机端 chips × 点击
+    if (el.tyChips) {
+      el.tyChips.addEventListener("click", (e) => {
+        if (e.target.classList.contains("chip-x")) {
+          removeTyphoon(e.target.dataset.id);
+        }
+      });
+    }
+    // 清除全部
+    if (el.tyMsClear) {
+      el.tyMsClear.addEventListener("click", () => {
+        clearAllTyphoonLayers();
+        clearDynamicLayers();
+        updateMultiUI();
+        renderPanel();
+      });
+    }
+
     // basemap switch: 高德 / Open地图, 各自 亮色 / 暗色
     function applyBasemap(base, variant) {
       if (state.basemap === base && state.variant === variant) return;
@@ -4965,8 +5782,11 @@
       if (el.varDark) el.varDark.classList.toggle("active", variant === "dark");
       if (state._renderArgs) {
         map.closePopup();
-        state.fitMap = false;
-        renderMap(state._renderArgs.points, state._renderArgs.latest, state._renderArgs.forecastPts);
+        // 多选时各台风在独立 layerGroup，底图切换无需重绘矢量层（避免用陈旧 _renderArgs 重复渲染单台风）
+        if (!isMultiSelect()) {
+          state.fitMap = false;
+          renderMap(state._renderArgs.points, state._renderArgs.latest, state._renderArgs.forecastPts);
+        }
       }
     }
     if (el.baseGaode) el.baseGaode.addEventListener("click", () => applyBasemap("gaode", state.variant));
@@ -5030,6 +5850,7 @@
         if (windOn) map.addLayer(layers.wind);
         else map.removeLayer(layers.wind);
         el.mcWind.classList.toggle("on", windOn);
+        syncLayerTogglesToAll();
       });
     }
 
@@ -5066,6 +5887,43 @@
       if (!body) return;
       body.innerHTML = "";
       // 无台风时显示提示，不克隆空数据块
+      if (selectedTyphoons.length === 0) {
+        const hint = document.createElement("div");
+        hint.className = "ms-hint";
+        hint.textContent = "请先在顶部选择台风";
+        body.appendChild(hint);
+        return;
+      }
+      // 多选模式：克隆对比表，不克隆地市影响
+      if (isMultiSelect()) {
+        const compare = document.querySelector(".ty-compare");
+        if (compare) {
+          const cClone = compare.cloneNode(true);
+          cClone.removeAttribute("id");
+          body.appendChild(cClone);
+        }
+        // footer 工具栏按钮（风圈/点位/刷新/框选）
+        const footerActions = document.querySelector("footer .toolbar-actions");
+        if (footerActions) {
+          const faClone = footerActions.cloneNode(true);
+          faClone.querySelectorAll("button").forEach((btn) => {
+            const orig = btn.id ? document.getElementById(btn.id) : null;
+            btn.removeAttribute("id");
+            if (!orig) return;
+            btn.addEventListener("click", () => {
+              orig.click();
+              if (orig.id === "fitBtn" || orig.id === "refreshBtn") {
+                setTimeout(() => toggleSheet(false), 120);
+              } else {
+                setTimeout(() => refreshSheetBody(), 120);
+              }
+            });
+          });
+          body.appendChild(faClone);
+        }
+        return;
+      }
+      // 单选模式：走原有克隆逻辑
       const hasTyphoon = !!(state.info && state.info.path && state.info.path.length);
       if (!hasTyphoon) {
         const hint = document.createElement("div");
@@ -5076,7 +5934,7 @@
       }
       // cityTabs 地市切换
       const cityTabs = document.getElementById("cityTabs");
-      if (cityTabs) {
+      if (cityTabs && !cityTabs.hidden) {
         const ctClone = cityTabs.cloneNode(true);
         ctClone.removeAttribute("id");
         ctClone.classList.add("ms-citytabs");
