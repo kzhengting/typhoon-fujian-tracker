@@ -2742,8 +2742,8 @@
               <div class="ty-ms-list" id="tyMsList" role="listbox"></div>
               <div class="ty-ms-footer">
                 <button type="button" id="tyMsClear">清除全部</button>
-                <span class="ty-ms-limit">最多 3 个</span>
-                <button type="button" id="tyMsDone" class="ty-ms-done">完成</button>
+                <span class="ty-ms-limit">最多 3 个 ·v7</span>
+                <button type="button" id="tyMsDone" class="ty-ms-done" onclick="var s=document.getElementById('tyMultiSel');if(s){s.classList.remove('open');}var p=document.getElementById('tyMsPanel');if(p){p.hidden=true;}var t=document.getElementById('tyMsTrigger');if(t){t.setAttribute('aria-expanded','false');}">完成</button>
               </div>
             </div>
           </div>
