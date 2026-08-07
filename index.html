@@ -861,6 +861,21 @@
       opacity: 0.8;
     }
 
+    /* 「完成」按钮：填充色突出显示，与「清除全部」纯文本样式形成对比 */
+    .ty-ms-done {
+      background: rgba(127, 212, 200, 0.2);
+      border: 1px solid rgba(127, 212, 200, 0.4);
+      border-radius: 6px;
+      padding: 0.2rem 0.7rem;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .ty-ms-done:hover {
+      background: rgba(127, 212, 200, 0.3);
+      opacity: 1;
+    }
+
     /* ===== 手机端标签条 ===== */
     .ty-chips {
       display: flex;
@@ -2109,7 +2124,8 @@
         left: 0;
         right: 0;
         bottom: 0;
-        max-height: 60vh;
+        max-height: 50vh;
+        max-height: 50dvh; /* 动态视口高度，适配地址栏收起/展开 */
         border-radius: 12px 12px 0 0;
         z-index: 1500;
       }
@@ -2725,6 +2741,7 @@
               <div class="ty-ms-footer">
                 <button type="button" id="tyMsClear">清除全部</button>
                 <span class="ty-ms-limit">最多 3 个</span>
+                <button type="button" id="tyMsDone" class="ty-ms-done">完成</button>
               </div>
             </div>
           </div>
@@ -3026,6 +3043,7 @@
       tyMsList: document.getElementById("tyMsList"),
       tyMsFilter: document.getElementById("tyMsFilter"),
       tyMsClear: document.getElementById("tyMsClear"),
+      tyMsDone: document.getElementById("tyMsDone"),
       tyMsChips: document.getElementById("tyMsChips"),
       tyMsPlaceholder: document.querySelector(".ty-ms-placeholder"),
       tyChips: document.getElementById("tyChips"),
@@ -5694,7 +5712,7 @@
         const isOpen = el.tyMultiSel.classList.toggle("open");
         el.tyMsPanel.hidden = !isOpen;
         el.tyMsTrigger.setAttribute("aria-expanded", String(isOpen));
-        if (isOpen && el.tyMsFilter) el.tyMsFilter.focus();
+        if (isOpen && el.tyMsFilter && !window.matchMedia("(pointer: coarse)").matches) el.tyMsFilter.focus();
       });
     }
     // 点外部收起：用 capture 阶段监听，绕过 Leaflet 对地图点击的 stopPropagation，
@@ -5762,6 +5780,15 @@
         clearDynamicLayers();
         updateMultiUI();
         renderPanel();
+      });
+    }
+
+    // 「完成」按钮：显式关闭下拉面板（不依赖事件传播，可靠兜底）
+    if (el.tyMsDone) {
+      el.tyMsDone.addEventListener("click", () => {
+        el.tyMultiSel.classList.remove("open");
+        el.tyMsPanel.hidden = true;
+        el.tyMsTrigger.setAttribute("aria-expanded", "false");
       });
     }
 
