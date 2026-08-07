@@ -5730,6 +5730,15 @@
     }
     document.addEventListener("click", closeMultiSelIfOutside, true);
     document.addEventListener("touchstart", closeMultiSelIfOutside, { capture: true, passive: true });
+    // Esc 键收起下拉：最直观的兜底方式，不依赖按钮可见性或事件传播
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      if (!el.tyMultiSel || !el.tyMultiSel.classList.contains("open")) return;
+      el.tyMultiSel.classList.remove("open");
+      el.tyMsPanel.hidden = true;
+      el.tyMsTrigger.setAttribute("aria-expanded", "false");
+      el.tyMsTrigger.focus();
+    });
     // 筛选输入
     if (el.tyMsFilter) {
       el.tyMsFilter.addEventListener("input", () => {
