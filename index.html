@@ -864,17 +864,18 @@
     }
 
     /* 「完成」按钮：填充色突出显示，与「清除全部」纯文本样式形成对比 */
-    .ty-ms-done {
-      background: rgba(127, 212, 200, 0.2);
-      border: 1px solid rgba(127, 212, 200, 0.4);
+    .ty-ms-footer .ty-ms-done {
+      background: rgba(127, 212, 200, 0.25);
+      border: 1px solid rgba(127, 212, 200, 0.5);
       border-radius: 6px;
-      padding: 0.2rem 0.7rem;
+      padding: 0.25rem 0.8rem;
       text-decoration: none;
-      font-weight: 600;
+      font-weight: 700;
+      font-size: 0.78rem;
     }
 
-    .ty-ms-done:hover {
-      background: rgba(127, 212, 200, 0.3);
+    .ty-ms-footer .ty-ms-done:hover {
+      background: rgba(127, 212, 200, 0.4);
       opacity: 1;
     }
 
@@ -883,19 +884,20 @@
       position: absolute;
       top: 6px;
       right: 8px;
-      z-index: 5;
-      background: transparent;
-      border: none;
-      color: var(--text-dim, #7a8a93);
-      font-size: 1.1rem;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 700;
       line-height: 1;
       cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 4px 10px;
+      border-radius: 6px;
     }
     .ty-ms-close:hover {
-      background: rgba(255, 255, 255, 0.12);
-      color: var(--text, #e6f0f5);
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
     }
 
     /* ===== 手机端标签条 ===== */
@@ -2763,7 +2765,7 @@
               <div class="ty-ms-list" id="tyMsList" role="listbox"></div>
               <div class="ty-ms-footer">
                 <button type="button" id="tyMsClear">清除全部</button>
-                <span class="ty-ms-limit">最多 3 个 ·v9</span>
+                <span class="ty-ms-limit">最多 3 个 ·v10</span>
                 <button type="button" id="tyMsDone" class="ty-ms-done" onclick="var s=document.getElementById('tyMultiSel');if(s){s.classList.remove('open');}var p=document.getElementById('tyMsPanel');if(p){p.hidden=true;}var t=document.getElementById('tyMsTrigger');if(t){t.setAttribute('aria-expanded','false');}">完成</button>
               </div>
             </div>
