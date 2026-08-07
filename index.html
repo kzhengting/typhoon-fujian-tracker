@@ -771,7 +771,7 @@
       border: 1px solid var(--line);
       border-radius: 12px;
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      max-height: 380px;
+      max-height: min(380px, calc(100vh - 240px));
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -2763,7 +2763,7 @@
               <div class="ty-ms-list" id="tyMsList" role="listbox"></div>
               <div class="ty-ms-footer">
                 <button type="button" id="tyMsClear">清除全部</button>
-                <span class="ty-ms-limit">最多 3 个 ·v8</span>
+                <span class="ty-ms-limit">最多 3 个 ·v9</span>
                 <button type="button" id="tyMsDone" class="ty-ms-done" onclick="var s=document.getElementById('tyMultiSel');if(s){s.classList.remove('open');}var p=document.getElementById('tyMsPanel');if(p){p.hidden=true;}var t=document.getElementById('tyMsTrigger');if(t){t.setAttribute('aria-expanded','false');}">完成</button>
               </div>
             </div>
