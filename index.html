@@ -5697,14 +5697,15 @@
         if (isOpen && el.tyMsFilter) el.tyMsFilter.focus();
       });
     }
-    // 点外部收起
+    // 点外部收起：用 capture 阶段监听，绕过 Leaflet 对地图点击的 stopPropagation，
+    // 使点击地图/台风路径等也能关闭下拉（bubble 阶段会被 Leaflet 拦截，到不了 document）
     document.addEventListener("click", (e) => {
       if (!el.tyMultiSel || !el.tyMultiSel.classList.contains("open")) return;
       if (el.tyMultiSel.contains(e.target)) return;
       el.tyMultiSel.classList.remove("open");
       el.tyMsPanel.hidden = true;
       el.tyMsTrigger.setAttribute("aria-expanded", "false");
-    });
+    }, true);
     // 筛选输入
     if (el.tyMsFilter) {
       el.tyMsFilter.addEventListener("input", () => {
