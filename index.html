@@ -97,7 +97,7 @@
 
     .stage {
       position: relative;
-      z-index: 3;
+      z-index: 5; /* 高于 .impact(z:4)，确保下拉面板底部延伸到 impact 区域时不被遮挡 */
       height: 100vh;
       height: 100dvh;
     }
