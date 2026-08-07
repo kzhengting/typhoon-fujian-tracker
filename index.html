@@ -627,6 +627,8 @@
       border-radius: 16px;
       box-shadow: var(--shadow);
       animation: rise 1s 0.12s cubic-bezier(0.22, 1, 0.36, 1) both;
+      position: relative;
+      z-index: 5; /* hero 的 backdrop-filter 创建层叠上下文，需高于 .impact(z:4) 才能让下拉面板不被遮挡 */
     }
 
     .ty-row {
